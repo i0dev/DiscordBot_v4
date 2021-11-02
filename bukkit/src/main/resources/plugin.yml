@@ -1,0 +1,6 @@
+name: DiscordBot
+version: ${project.version}
+main: ${project.groupId}.bukkit.BukkitMain
+author: i01
+softdepend: [Vault]
+api-version: 1.13
