@@ -39,6 +39,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.i0dev.discordbot</groupId>
             <artifactId>DiscordBot-Core</artifactId>
             <version>${project.version}</version>
