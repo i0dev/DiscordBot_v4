@@ -110,8 +110,6 @@ public class Heart {
 
 
     public void addCommands() {
-        commands.forEach(DiscordCommand::deinitialize);
-        commands.clear();
         commands.addAll(Arrays.asList(
                 new CmdHelp(this, cmdCnf().getHelp()),
                 new CmdMembers(this, cmdCnf().getMembers()),
@@ -137,7 +135,6 @@ public class Heart {
                 new CmdMute(this, cmdCnf().getMute()),
                 new CmdAvatar(this, cmdCnf().getAvatar())
         ));
-        jda.getRegisteredListeners().forEach(jda::removeEventListener);
         commands.forEach(command -> {
             command.initialize();
             /* TEMPORARY */
@@ -185,6 +182,10 @@ public class Heart {
         managers.forEach(AbstractManager::deinitialize);
         commands.forEach(DiscordCommand::deinitialize);
         tasks.forEach(AbstractTask::deinitialize);
+        commands.clear();
+        managers.clear();
+        configs.clear();
+        tasks.clear();
         jda.shutdown();
         executorService.shutdown();
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Shutdown." + ConsoleColors.RESET);

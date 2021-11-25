@@ -23,20 +23,13 @@ public class CmdReload extends DiscordCommand {
 
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
-        heart.registerConfigs();
-
-        heart.getTasks().forEach(AbstractManager::deinitialize);
-        heart.getTasks().forEach(AbstractManager::initialize);
-
-        heart.getManagers().forEach(AbstractManager::deinitialize);
-        heart.getManagers().forEach(AbstractManager::initialize);
-
-        heart.addCommands();
-
         data.reply(EmbedMaker.builder()
                 .content("You have reloaded the configuration.")
                 .colorHexCode(getHeart().successColor())
                 .build());
+
+        heart.shutdown();
+        heart.startup();
     }
 
 }
