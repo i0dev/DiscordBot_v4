@@ -14,13 +14,11 @@ import java.util.List;
 
 @Getter
 @ToString
-@NoArgsConstructor
 @Setter
 public class MiscConfig extends AbstractConfiguration {
 
     public MiscConfig(Heart heart, String path) {
-        this.path = path;
-        this.heart = heart;
+        super(heart, path);
     }
 
 

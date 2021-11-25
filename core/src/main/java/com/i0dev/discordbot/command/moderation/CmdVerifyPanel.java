@@ -43,7 +43,7 @@ public class CmdVerifyPanel extends DiscordCommand {
                         .content(getConfigMessage("content"))
                         .colorHexCode(heart.normalColor())
                         .build()))
-                .setActionRow(Button.success("BUTTON_VERIFY_PANEL", ((String) getConfigOption("buttonLabel"))).withEmoji(Emoji.fromMarkdown(((String) getConfigOption("buttonEmoji")))))
+                .setActionRow(Button.success("BUTTON_VERIFY_PANEL", getConfigOption("buttonLabel").getAsString()).withEmoji(Emoji.fromMarkdown(getConfigOption("buttonEmoji").getAsString())))
                 .complete();
         if (pin) message.pin();
         e.reply("Verify panel sent.").setEphemeral(true).queue();

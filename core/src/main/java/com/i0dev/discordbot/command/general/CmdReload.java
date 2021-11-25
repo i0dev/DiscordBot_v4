@@ -1,6 +1,7 @@
 package com.i0dev.discordbot.command.general;
 
 import com.i0dev.discordbot.Heart;
+import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
@@ -23,6 +24,15 @@ public class CmdReload extends DiscordCommand {
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
         heart.registerConfigs();
+
+        heart.getTasks().forEach(AbstractManager::deinitialize);
+        heart.getTasks().forEach(AbstractManager::initialize);
+
+        heart.getManagers().forEach(AbstractManager::deinitialize);
+        heart.getManagers().forEach(AbstractManager::initialize);
+
+        heart.addCommands();
+
         data.reply(EmbedMaker.builder()
                 .content("You have reloaded the configuration.")
                 .colorHexCode(getHeart().successColor())

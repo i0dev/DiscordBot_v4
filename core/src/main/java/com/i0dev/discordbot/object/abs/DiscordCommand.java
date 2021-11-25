@@ -1,5 +1,8 @@
 package com.i0dev.discordbot.object.abs;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.Requirement;
 import lombok.Getter;
@@ -71,16 +74,23 @@ public abstract class DiscordCommand extends ListenerAdapter {
         heart.getAllowedGuilds().forEach(guild -> guild.updateCommandPrivilegesById(this.command, privileges).queue());
     }
 
-    protected Object getConfigOption(String key) {
+    protected JsonElement getConfigOption(String key) {
         return getConfigSection().getOptions().get(key);
     }
 
+    protected JsonArray getConfigOptionJsonArray(String key) {
+        return getConfigSection().getOptions().get(key).getAsJsonArray();
+    }
+
     protected <T> List<T> getConfigOptionList(String key) {
-        return (List<T>) getConfigSection().getOptions().get(key);
+        List<T> ret = new ArrayList<>();
+        JsonArray arr = getConfigSection().getOptions().get(key).getAsJsonArray();
+        arr.forEach(jsonElement -> ret.add((T) jsonElement));
+        return ret;
     }
 
     protected String getConfigMessage(String key) {
-        return getConfigSection().getMessages().get(key);
+        return getConfigSection().getMessages().get(key).getAsString();
     }
 
     public void initialize() {

@@ -9,7 +9,13 @@ import com.i0dev.discordbot.object.config.MultiCommandData;
 import com.i0dev.discordbot.object.config.NamedCommandData;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CmdHelp extends DiscordCommand {
 
@@ -17,9 +23,19 @@ public class CmdHelp extends DiscordCommand {
         super(heart, commandData);
     }
 
+    int pages = 2;
+
     @Override
     protected void setupCommand() {
         setCommand("help");
+
+        List<Command.Choice> choices = new ArrayList<>();
+        for (int i = 0; i < pages; i++) {
+            choices.add(new Command.Choice("" + i + 1, i + 1));
+        }
+        addOption(new OptionData(OptionType.INTEGER, "page", "page number", true).setRequiredRange(1, pages)
+                .addChoices(choices)
+        );
         setDescription("Gets the help page.");
     }
 

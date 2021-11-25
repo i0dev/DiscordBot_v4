@@ -1,6 +1,7 @@
 package com.i0dev.discordbot.manager;
 
 import com.i0dev.discordbot.Heart;
+import com.i0dev.discordbot.config.TicketStorage;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.Requirement;
 import com.i0dev.discordbot.object.abs.AbstractManager;
@@ -26,46 +27,35 @@ public class DiscordCommandManager extends AbstractManager {
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent e) {
+        CommandEventData data = new CommandEventData(heart, e);
+        DiscordUser user = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
         for (DiscordCommand command : heart.getCommands()) {
             try {
                 if (command.getCommand() == null) continue;
                 if (!command.getCommand().equalsIgnoreCase(e.getName())) continue;
-                CommandEventData data = new CommandEventData(heart, e);
-                DiscordUser user = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
                 if (!hasPermission(command.getConfigSection(), e)) {
-                    data.reply(EmbedMaker.builder()
-                            .content("You don't have permission to use this command!")
-                            .colorHexCode(heart.failureColor())
-                            .build());
+                    data.replyFailure("You don't have permission to use this command!");
                     return;
                 }
                 if (isBlacklisted(data.getDiscordUser())) {
-                    data.reply(EmbedMaker.builder()
-                            .content("You are blacklisted from using this bot!")
-                            .colorHexCode(heart.failureColor())
-                            .build());
+                    data.replyFailure("You are blacklisted from using this bot!");
                     return;
                 }
                 if (!isValidGuild(e.getGuild())) {
-                    data.reply(EmbedMaker.builder()
-                            .content("This bot is not allowed to be used in this server.")
-                            .colorHexCode(heart.failureColor())
-                            .build());
+                    data.replyFailure("This bot is not allowed to be used in this server.");
                     return;
                 }
                 // Requirements
                 if (null == e.getGuild() && command.getRequirements().contains(Requirement.IN_GUILD)) {
-                    data.reply(EmbedMaker.builder()
-                            .content("This command can only be used in a server.")
-                            .colorHexCode(heart.failureColor())
-                            .build());
+                    data.replyFailure("This command can only be used in a server.");
                     return;
                 }
                 if (!user.isLinked() && command.getRequirements().contains(Requirement.LINKED)) {
-                    data.reply(EmbedMaker.builder()
-                            .content("You need to link your account in-game before you can use this command.")
-                            .colorHexCode(heart.failureColor())
-                            .build());
+                    data.replyFailure("You need to link your account in-game before you can use this command.");
+                    return;
+                }
+                if (command.getRequirements().contains(Requirement.IS_TICKET) && heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) == null) {
+                    data.replyFailure("This command can only be used in a ticket channel.");
                     return;
                 }
                 // End Requirements
@@ -74,10 +64,7 @@ public class DiscordCommandManager extends AbstractManager {
                     String subcommandName = e.getSubcommandName();
                     NamedCommandData subcommand = multiCommandData.getCommandDataBySubCommandName(subcommandName);
                     if (!hasPermission(subcommand, e)) {
-                        data.reply(EmbedMaker.builder()
-                                .content("You don't have permission to use this command!")
-                                .colorHexCode(heart.failureColor())
-                                .build());
+                        data.replyFailure("You don't have permission to use this command!");
                         return;
                     }
                 }
@@ -93,10 +80,7 @@ public class DiscordCommandManager extends AbstractManager {
                 return;
             }
         }
-        e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
-                .content("This command does not exist!")
-                .colorHexCode(heart.failureColor())
-                .build())).queue();
+        data.replyFailure("This command does not exist!");
     }
 
 
@@ -115,16 +99,16 @@ public class DiscordCommandManager extends AbstractManager {
         if (configSection.isRequirePermission()) {
             if (e.getMember() == null) return false;
             configSection.getAllowedOverride().forEach(id -> {
-                Role role = heart.getJda().getRoleById(id);
+                Role role = heart.getJda().getRoleById(id.getAsLong());
                 if (role != null && e.getMember().getRoles().contains(role)) allowed.set(true);
-                else if (e.getUser().getIdLong() == id) allowed.set(true);
+                else if (e.getUser().getIdLong() == id.getAsLong()) allowed.set(true);
             });
         } else allowed.set(true);
         configSection.getBlockedOverride().forEach(id -> {
-            Role role = heart.getJda().getRoleById(id);
+            Role role = heart.getJda().getRoleById(id.getAsLong());
             if (role != null && e.getMember() != null && e.getMember().getRoles().contains(role))
                 allowed.set(false);
-            else if (e.getUser().getIdLong() == id) allowed.set(false);
+            else if (e.getUser().getIdLong() == id.getAsLong()) allowed.set(false);
         });
         return allowed.get();
     }

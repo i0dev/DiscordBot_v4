@@ -1,5 +1,7 @@
 package com.i0dev.discordbot.object.config;
 
+import com.google.gson.JsonElement;
+import com.i0dev.discordbot.Heart;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,28 +16,9 @@ public class NamedCommandData extends CommandData {
 
     String identifier_DontChange;
 
-    public NamedCommandData(String identifier_DontChange, boolean requirePermission, List<Long> allowedOverride, List<Long> blockedOverride, Map<String, String> messages, Map<String, Object> options) {
-        super(requirePermission, allowedOverride, blockedOverride, messages, options);
-        this.identifier_DontChange = identifier_DontChange;
-    }
 
-    public NamedCommandData(String identifier_DontChange, boolean requirePermission) {
-        super(requirePermission);
-        this.identifier_DontChange = identifier_DontChange;
-    }
-
-    public NamedCommandData(String identifier_DontChange, boolean requirePermission, List<Long> allowedOverride) {
-        super(requirePermission, allowedOverride);
-        this.identifier_DontChange = identifier_DontChange;
-    }
-
-    public NamedCommandData(String identifier_DontChange, boolean requirePermission, List<Long> allowedOverride, List<Long> blockedOverride) {
-        super(requirePermission, allowedOverride, blockedOverride);
-        this.identifier_DontChange = identifier_DontChange;
-    }
-
-    public NamedCommandData(String identifier_DontChange, boolean requirePermission, List<Long> allowedOverride, List<Long> blockedOverride, Map<String, String> messages) {
-        super(requirePermission, allowedOverride, blockedOverride, messages);
+    public NamedCommandData(Heart heart, String identifier_DontChange, boolean requirePermission) {
+        super(heart, requirePermission);
         this.identifier_DontChange = identifier_DontChange;
     }
 }

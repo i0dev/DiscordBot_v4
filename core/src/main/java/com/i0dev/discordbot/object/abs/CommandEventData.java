@@ -27,6 +27,15 @@ public class CommandEventData {
         event.replyEmbeds(heart.msgMgr().createMessageEmbed(embedMaker)).queue();
     }
 
+    public void replyFailure(String message) {
+        event.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().content(message).colorHexCode(heart.failureColor()).build())).queue();
+    }
+
+    public void replySuccess(String message) {
+        event.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().content(message).colorHexCode(heart.successColor()).build())).queue();
+    }
+
+
     public Message replyComplete(EmbedMaker embedMaker) {
         return (Message) event.replyEmbeds(heart.msgMgr().createMessageEmbed(embedMaker)).complete().getInteraction();
     }

@@ -1,15 +1,12 @@
 package com.i0dev.discordbot;
 
-import com.i0dev.discordbot.command.CmdBlacklist;
-import com.i0dev.discordbot.command.CmdInvite;
-import com.i0dev.discordbot.command.CmdMute;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.i0dev.discordbot.command.*;
 import com.i0dev.discordbot.command.fun.CmdCoinflip;
 import com.i0dev.discordbot.command.general.*;
 import com.i0dev.discordbot.command.moderation.*;
-import com.i0dev.discordbot.config.CommandConfig;
-import com.i0dev.discordbot.config.CommandDataCacheStorage;
-import com.i0dev.discordbot.config.GeneralConfig;
-import com.i0dev.discordbot.config.MiscConfig;
+import com.i0dev.discordbot.config.*;
 import com.i0dev.discordbot.manager.*;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.Pair;
@@ -19,6 +16,7 @@ import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.abs.AbstractTask;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.task.TaskExecuteRoleQueue;
+import com.i0dev.discordbot.task.TaskUpdateDiscordActivity;
 import com.i0dev.discordbot.util.ConsoleColors;
 import lombok.Getter;
 import lombok.Setter;
@@ -65,7 +63,7 @@ public class Heart {
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "==============================" + ConsoleColors.RESET);
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|                            |" + ConsoleColors.RESET);
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|     " + ConsoleColors.PURPLE_BOLD + "i0dev Discord Bot" + ConsoleColors.WHITE_BOLD + "      |" + ConsoleColors.RESET);
-        logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|        " + ConsoleColors.GREEN_BOLD + "4th Edition" + ConsoleColors.WHITE_BOLD + "         |" + ConsoleColors.RESET);
+        logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|       " + ConsoleColors.GREEN_BOLD + "Version " + VERSION + ConsoleColors.WHITE_BOLD + "        |" + ConsoleColors.RESET);
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|         " + ConsoleColors.BLUE_BOLD + "Loading..." + ConsoleColors.WHITE_BOLD + "         |" + ConsoleColors.RESET);
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "|                            |" + ConsoleColors.RESET);
         logger.log(Level.INFO, ConsoleColors.WHITE_BOLD + "==============================" + ConsoleColors.RESET);
@@ -88,8 +86,32 @@ public class Heart {
                 new GeneralConfig(this, getDataFolder() + "/general.json"),
                 new MiscConfig(this, getDataFolder() + "/misc.json"),
                 new CommandDataCacheStorage(this, getDataFolder() + "/cmdCache.json"),
+                new SuggestionStorage(this, getDataFolder() + "/suggestions.json"),
+                new TicketStorage(this, getDataFolder() + "/tickets.json"),
                 new CommandConfig(this, getDataFolder() + "/commands.json")
         ));
+        managers.forEach(AbstractManager::initialize);
+        registerConfigs();
+        createJDA();
+        managers.forEach(jda::addEventListener);
+        addCommands();
+        tasks.addAll(Arrays.asList(
+                new TaskExecuteRoleQueue(this),
+                new TaskUpdateDiscordActivity(this)
+
+        ));
+        executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
+        tasks.forEach(AbstractTask::initialize);
+        startTasks();
+        sqlMgr().makeTable(DiscordUser.class);
+        sqlMgr().absenceCheck(DiscordUser.class);
+        logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Loaded!" + ConsoleColors.RESET);
+    }
+
+
+    public void addCommands() {
+        commands.forEach(DiscordCommand::deinitialize);
+        commands.clear();
         commands.addAll(Arrays.asList(
                 new CmdHelp(this, cmdCnf().getHelp()),
                 new CmdMembers(this, cmdCnf().getMembers()),
@@ -99,6 +121,7 @@ public class Heart {
                 new CmdRoles(this, cmdCnf().getRoles()),
                 new CmdBan(this, cmdCnf().getBan()),
                 new CmdAnnounce(this, cmdCnf().getAnnounce()),
+                new CmdTicket(this, cmdCnf().getTicket()),
                 new CmdKick(this, cmdCnf().getKick()),
                 new CmdReload(this, cmdCnf().getReload()),
                 new CmdBotInfo(this, cmdCnf().getBotInfo()),
@@ -109,19 +132,12 @@ public class Heart {
                 new CmdServerInfo(this, cmdCnf().getServerInfo()),
                 new CmdServerLookup(this, cmdCnf().getServerLookup()),
                 new CmdBlacklist(this, cmdCnf().getBlacklist()),
+                new CmdSuggestion(this, cmdCnf().getSuggestion()),
                 new CmdInvite(this, cmdCnf().getInvite()),
                 new CmdMute(this, cmdCnf().getMute()),
                 new CmdAvatar(this, cmdCnf().getAvatar())
         ));
-        tasks.addAll(Arrays.asList(
-                new TaskExecuteRoleQueue(this)
-        ));
-
-        // Other startup
-        managers.forEach(AbstractManager::initialize);
-        registerConfigs();
-        createJDA();
-        managers.forEach(jda::addEventListener);
+        jda.getRegisteredListeners().forEach(jda::removeEventListener);
         commands.forEach(command -> {
             command.initialize();
             /* TEMPORARY */
@@ -131,12 +147,6 @@ public class Heart {
         cnfMgr().save(cmdCacheStrg(), cmdCacheStrg().path);
         //  upsertCommands();
         //  updateCommands();
-        executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
-        tasks.forEach(AbstractTask::initialize);
-        startTasks();
-        sqlMgr().makeTable(DiscordUser.class);
-        sqlMgr().absenceCheck(DiscordUser.class);
-        logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Loaded!" + ConsoleColors.RESET);
     }
 
     public void startTasks() {
@@ -227,6 +237,10 @@ public class Heart {
 
     public void logDebug(String message) {
         logger.log(Level.INFO, ConsoleColors.YELLOW + "-> " + ConsoleColors.WHITE_BOLD + message + ConsoleColors.RESET);
+    }
+
+    public JsonArray listToJsonArr(Object object) {
+        return new Gson().fromJson(new Gson().toJson(object), JsonArray.class);
     }
 
     // Color Shortcuts

@@ -1,14 +1,21 @@
 package com.i0dev.discordbot.command;
 
 import com.i0dev.discordbot.Heart;
+import com.i0dev.discordbot.config.CommandConfig;
+import com.i0dev.discordbot.manager.ConfigManager;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.config.CommandData;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -17,7 +24,10 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Setter
+@Getter
 public class CmdMute extends DiscordCommand {
 
     public CmdMute(Heart heart, CommandData configSection) {
@@ -28,7 +38,7 @@ public class CmdMute extends DiscordCommand {
 
     @Override
     public void initialize() {
-        muteRole = heart.getJda().getRoleById(((long) getConfigOption("muteRole")));
+        muteRole = heart.getJda().getRoleById(getConfigOption("muteRole").getAsLong());
     }
 
     @Override
@@ -168,23 +178,33 @@ public class CmdMute extends DiscordCommand {
     }
 
     public void clear(SlashCommandEvent e, CommandEventData data) {
-        heart.sqlMgr().runQuery("update DiscordUser set blacklisted = 0;");
+        heart.sqlMgr().runQuery("update DiscordUser set muted = 0;");
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
                 .author(e.getUser())
-                .content("You have cleared the entire blacklist.")
+                .content("You have cleared all muted users.")
                 .colorHexCode(heart.successColor())
                 .build());
     }
 
     public void create(SlashCommandEvent e, CommandEventData data) {
-        heart.sqlMgr().runQuery("update DiscordUser set blacklisted = 0;");
-
+        Role role = e.getGuild().createRole().setName("Muted").setColor(java.awt.Color.darkGray).complete();
+        for (TextChannel channel : e.getGuild().getTextChannels()) {
+            channel.putPermissionOverride(role).setDeny(Permission.MESSAGE_WRITE).queueAfter(5, TimeUnit.SECONDS);
+        }
+        for (VoiceChannel channel : e.getGuild().getVoiceChannels()) {
+            channel.putPermissionOverride(role).setDeny(Permission.VOICE_SPEAK).queueAfter(5, TimeUnit.SECONDS);
+        }
+        setMuteRole(role);
+        CommandData sec = getConfigSection();
+        sec.getOptions().addProperty("muteRole", role.getId());
+        setConfigSection(sec);
+        heart.cnfMgr().save(heart.getConfig(CommandConfig.class), heart.getConfig(CommandConfig.class).getPath());
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
                 .author(e.getUser())
-                .content("You have cleared the entire blacklist.")
+                .content("You have auto-generated a muted role.\nID: `{id}`".replace("{id}", role.getId()))
                 .colorHexCode(heart.successColor())
                 .build());
     }

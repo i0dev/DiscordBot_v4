@@ -4,6 +4,7 @@ public enum Requirement {
 
     LINKED,
     IN_GUILD,
+    IS_TICKET
 
 
 }

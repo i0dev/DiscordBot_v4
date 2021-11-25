@@ -13,13 +13,11 @@ import java.util.List;
 
 @Getter
 @ToString
-@NoArgsConstructor
 @Setter
 public class GeneralConfig extends AbstractConfiguration {
 
     public GeneralConfig(Heart heart, String path) {
-        this.path = path;
-        this.heart = heart;
+        super(heart, path);
     }
 
     String botToken = "NzQ4NzQ1NTA4ODMwNDQ1NTk4.X0h5mA.z2cVqID14C9wQvrO1gcQx7yRRYw";

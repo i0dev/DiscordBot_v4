@@ -43,6 +43,11 @@ public class ConfigManager extends AbstractManager {
         Files.write(Paths.get(path), ObjectToJson(object, true).getBytes());
     }
 
+    @SneakyThrows
+    public void save(AbstractConfiguration object) {
+        Files.write(Paths.get(object.getPath()), ObjectToJson(object, true).getBytes());
+    }
+
     public JsonObject getJsonObject(String path) {
         try {
             Reader reader = Files.newBufferedReader(Paths.get(path));

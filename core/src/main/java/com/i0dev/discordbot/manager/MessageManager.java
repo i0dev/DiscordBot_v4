@@ -48,6 +48,7 @@ public class MessageManager extends AbstractManager {
 
         if (builder.getFields() != null) {
             for (MessageEmbed.Field field : builder.getFields()) {
+                if (field == null) continue;
                 MessageEmbed.Field newField = new MessageEmbed.Field(heart.msgMgr().replacePlaceholders(field.getName(), builder), heart.msgMgr().replacePlaceholders(field.getValue(), builder), field.isInline());
                 embedBuilder.addField(newField);
             }
