@@ -16,6 +16,7 @@ import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.abs.AbstractTask;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.task.TaskExecuteRoleQueue;
+import com.i0dev.discordbot.task.TaskRunTicketLogQueue;
 import com.i0dev.discordbot.task.TaskUpdateDiscordActivity;
 import com.i0dev.discordbot.util.ConsoleColors;
 import lombok.Getter;
@@ -97,7 +98,8 @@ public class Heart {
         addCommands();
         tasks.addAll(Arrays.asList(
                 new TaskExecuteRoleQueue(this),
-                new TaskUpdateDiscordActivity(this)
+                new TaskUpdateDiscordActivity(this),
+                new TaskRunTicketLogQueue(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));

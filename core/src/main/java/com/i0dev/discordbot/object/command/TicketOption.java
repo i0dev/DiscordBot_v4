@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class TicketOption {
+    String ticketID;
     List<String> questions;
     long category;
     String channelName, emoji, displayName, buttonLabel = "";

@@ -33,7 +33,7 @@ public class CmdHelp extends DiscordCommand {
         for (int i = 0; i < pages; i++) {
             choices.add(new Command.Choice("" + i + 1, i + 1));
         }
-        addOption(new OptionData(OptionType.INTEGER, "page", "page number", true).setRequiredRange(1, pages)
+        addOption(new OptionData(OptionType.INTEGER, "page", "page number", true)
                 .addChoices(choices)
         );
         setDescription("Gets the help page.");
@@ -41,6 +41,7 @@ public class CmdHelp extends DiscordCommand {
 
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
+        long page = e.getOption("page").getAsLong();
         StringBuilder commands = new StringBuilder();
         StringBuilder multiCommands = new StringBuilder();
         for (DiscordCommand command : getHeart().getCommands()) {
@@ -56,7 +57,7 @@ public class CmdHelp extends DiscordCommand {
 
 
         data.reply(EmbedMaker.builder()
-                .authorName("DiscordBot Help Page")
+                .authorName("DiscordBot Help Page " + page)
                 .fields(new MessageEmbed.Field[]{
                                 new MessageEmbed.Field("__**Commands**__", commands.toString(), true),
                                 new MessageEmbed.Field("__**Multi Commands**__", multiCommands.toString(), true)

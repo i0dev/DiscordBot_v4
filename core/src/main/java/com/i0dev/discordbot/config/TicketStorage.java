@@ -21,6 +21,8 @@ public class TicketStorage extends AbstractConfiguration {
         super(heart, path);
     }
 
+
+    long ticketNumber = 1;
     List<Ticket> tickets = new ArrayList<>();
 
     public Ticket getTicketByID(String ID) {

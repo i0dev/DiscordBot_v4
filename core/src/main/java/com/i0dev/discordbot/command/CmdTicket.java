@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.config.SuggestionStorage;
 import com.i0dev.discordbot.config.TicketStorage;
 import com.i0dev.discordbot.object.DiscordUser;
+import com.i0dev.discordbot.object.LogObject;
 import com.i0dev.discordbot.object.Requirement;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
@@ -12,12 +13,16 @@ import com.i0dev.discordbot.object.command.Suggestion;
 import com.i0dev.discordbot.object.command.Ticket;
 import com.i0dev.discordbot.object.command.TicketOption;
 import com.i0dev.discordbot.object.config.CommandData;
+import com.i0dev.discordbot.task.TaskRunTicketLogQueue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -25,11 +30,16 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Setter
 @Getter
@@ -41,17 +51,24 @@ public class CmdTicket extends DiscordCommand {
 
     TextChannel adminLogs, ticketLogs, ticketCreate;
 
-    List<String> rolesToSeeTickets;
+    List<Long> rolesToSeeTickets;
     List<TicketOption> ticketOptions;
-    List<String> adminOnlySeeRoles;
+    List<Long> adminOnlySeeRoles;
+    List<Long> rolesToPing;
 
     String adminOnlyLabel, closeTicketLabel;
     String adminOnlyEmoji, closeTicketEmoji;
 
     TicketStorage storage;
 
-    long ticketTopLimit;
+    Category defaultCategory;
+
+    long ticketTopLimit, maxTicketsPerUser;
     boolean buttonsEnabled;
+
+    boolean allowTicketOwnerToCloseOwnTicket;
+
+    String defaultCloseReason;
 
     @Override
     public void initialize() {
@@ -59,9 +76,17 @@ public class CmdTicket extends DiscordCommand {
         adminLogs = heart.getJda().getTextChannelById(getConfigOption("adminLogsChannel").getAsLong());
         ticketLogs = heart.getJda().getTextChannelById(getConfigOption("ticketLogsChannel").getAsLong());
         ticketCreate = heart.getJda().getTextChannelById(getConfigOption("ticketCreateChannel").getAsLong());
-        rolesToSeeTickets = getConfigOptionList("rolesToSeeTickets");
-        adminOnlySeeRoles = getConfigOptionList("adminOnlySeeRoles");
+        allowTicketOwnerToCloseOwnTicket = getConfigOption("allowTicketOwnerToCloseOwnTicket").getAsBoolean();
+        defaultCloseReason = getConfigOption("defaultCloseReason").getAsString();
+        rolesToSeeTickets = new ArrayList<>();
+        getConfigOptionJsonArray("rolesToSeeTickets").forEach(roleId -> rolesToSeeTickets.add(roleId.getAsLong()));
+        adminOnlySeeRoles = new ArrayList<>();
+        getConfigOptionJsonArray("adminOnlySeeRoles").forEach(roleId -> adminOnlySeeRoles.add(roleId.getAsLong()));
+        rolesToPing = new ArrayList<>();
+        getConfigOptionJsonArray("rolesToPing").forEach(roleId -> rolesToPing.add(roleId.getAsLong()));
+        maxTicketsPerUser = getConfigOption("maxTicketsPerUser").getAsLong();
         ticketOptions = new ArrayList<>();
+        defaultCategory = heart.getJda().getCategoryById(getConfigOption("defaultCategory").getAsLong());
         getConfigOptionJsonArray("ticketOptions").forEach(o -> ticketOptions.add((TicketOption) heart.cnfMgr().JsonToObject(o, TicketOption.class)));
         adminOnlyEmoji = getConfigOption("adminOnlyEmoji").getAsString();
         closeTicketEmoji = getConfigOption("closeTicketEmoji").getAsString();
@@ -69,20 +94,25 @@ public class CmdTicket extends DiscordCommand {
         closeTicketLabel = getConfigOption("closeTicketLabel").getAsString();
         storage = heart.getConfig(TicketStorage.class);
         ticketTopLimit = getConfigOption("ticketTopLimit").getAsLong();
+        new File(heart.getDataFolder() + "/ticketLogs/").mkdir();
     }
 
     @Override
     public void deinitialize() {
         adminLogs = null;
+        rolesToPing = null;
         ticketLogs = null;
         ticketCreate = null;
         rolesToSeeTickets = null;
+        maxTicketsPerUser = 0;
         buttonsEnabled = false;
         ticketOptions = null;
         adminOnlySeeRoles = null;
         adminOnlyEmoji = null;
         closeTicketEmoji = null;
+        defaultCloseReason = null;
         adminOnlyLabel = null;
+        allowTicketOwnerToCloseOwnTicket = false;
         ticketTopLimit = 0;
         closeTicketLabel = null;
         storage = null;
@@ -145,40 +175,24 @@ public class CmdTicket extends DiscordCommand {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         if (ticket.isAdminOnlyMode()) {
-            data.replyFailure("This ticket is already admin only.");
+            ticket.setAdminOnlyMode(false);
+            setTicketNormalaMode(ticket);
+            data.replySuccess("Ticket is no longer admin only.");
             return;
+        } else {
+            ticket.setAdminOnlyMode(true);
+            setTicketAdminOnly(ticket);
+            data.replySuccess("Ticket is now in admin only mode.");
         }
-        ticket.setAdminOnlyMode(true);
         heart.cnfMgr().save(storage);
-        for (String roleID : rolesToSeeTickets) {
-            Role role = e.getGuild().getRoleById(roleID);
-            if (role == null) continue;
-            ((TextChannel) e.getChannel()).putPermissionOverride(role)
-                    .setDeny(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS,
-                            Permission.MESSAGE_HISTORY, Permission.MESSAGE_ADD_REACTION,
-                            Permission.CREATE_INSTANT_INVITE, Permission.MESSAGE_MENTION_EVERYONE,
-                            Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS, Permission.MANAGE_WEBHOOKS,
-                            Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
-                    .queue();
-        }
-        for (String roleID : adminOnlySeeRoles) {
-            Role role = e.getGuild().getRoleById(roleID);
-            if (role == null) continue;
-            ((TextChannel) e.getChannel()).putPermissionOverride(role)
-                    .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
-                    .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                            Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
-                    .queue();
-        }
-        data.replySuccess("Ticket is now in admin only mode.");
     }
 
     public void close(SlashCommandEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
-
+        Ticket ticket = storage.getTicketByID(e.getChannel().getId());
+        String reason = e.getOption("reason") == null ? defaultCloseReason : e.getOption("close").getAsString();
+        closeTicket(ticket, reason, e.getUser());
+        e.deferReply().queue();
     }
 
     public void info(SlashCommandEvent e, CommandEventData data) {
@@ -240,11 +254,9 @@ public class CmdTicket extends DiscordCommand {
 
         List<Button> buttons = new ArrayList<>();
         if (buttonsEnabled) {
-            int index = 0;
             for (TicketOption ticketOption : ticketOptions) {
-                Button button = Button.primary("TICKET_OPTION_" + index, Emoji.fromUnicode(ticketOption.getEmoji())).withLabel(ticketOption.getButtonLabel());
+                Button button = Button.primary("TICKET_OPTION_" + ticketOption.getTicketID(), Emoji.fromUnicode(ticketOption.getEmoji())).withLabel(ticketOption.getButtonLabel());
                 buttons.add(button);
-                index++;
             }
         }
 
@@ -297,11 +309,345 @@ public class CmdTicket extends DiscordCommand {
 
     // Utility methods
 
+    public boolean ticketCheck(TextChannel channel) {
+        return heart.getConfig(TicketStorage.class).getTicketByID(channel.getId()) != null;
+    }
+
     public boolean ticketCheck(SlashCommandEvent e, CommandEventData data) {
         boolean isTicket = heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) != null;
         if (!isTicket) data.replyFailure("This command can only be used in a ticket channel.");
         return isTicket;
     }
 
+    public void setTicketNormalaMode(Ticket ticket) {
+        TextChannel channel = heart.getJda().getTextChannelById(ticket.getChannelID());
+        if (channel == null) return;
+        TicketOption option = getTicketOptionById(ticket.getTicketID());
+        if (option == null) return;
+        for (Long roleID : option.getRolesToSee().isEmpty() ? rolesToSeeTickets : option.getRolesToSee()) {
+            Role role = channel.getGuild().getRoleById(roleID);
+            if (role == null) continue;
+            channel.putPermissionOverride(role)
+                    .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
+                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
+                    .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
+                            Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                    .queue();
+        }
+    }
 
+    public void denyPermissions(TextChannel channel, List<Long> roleIds) {
+        for (Long roleID : roleIds) {
+            Role role = channel.getGuild().getRoleById(roleID);
+            if (role == null) continue;
+            channel.putPermissionOverride(role)
+                    .setDeny(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
+                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
+                            Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
+                            Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                    .queue();
+        }
+    }
+
+    public void setTicketAdminOnly(Ticket ticket) {
+        TextChannel channel = heart.getJda().getTextChannelById(ticket.getChannelID());
+        if (channel == null) return;
+        TicketOption option = getTicketOptionById(ticket.getTicketID());
+        if (option == null) return;
+        denyPermissions(channel, option.getRolesToSee().isEmpty() ? rolesToSeeTickets : option.getRolesToSee());
+        for (Long roleID : adminOnlySeeRoles) {
+            Role role = channel.getGuild().getRoleById(roleID);
+            if (role == null) continue;
+            channel.putPermissionOverride(role)
+                    .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
+                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
+                    .queue();
+        }
+    }
+
+    public TextChannel createTicket(TicketOption option, User owner, Guild guild) {
+        Member member = guild.getMember(owner);
+        Category category = heart.getJda().getCategoryById(option.getCategory()) == null ? defaultCategory : heart.getJda().getCategoryById(option.getCategory());
+        long newTicketNumber = storage.getTicketNumber() + 1;
+        storage.setTicketNumber(newTicketNumber);
+        String channelName = option.getChannelName().replace("{num}", String.valueOf(newTicketNumber));
+        TextChannel channel = category.createTextChannel(channelName).complete();
+        Ticket ticket = new Ticket();
+        ticket.setTicketNumber(newTicketNumber);
+        ticket.setTicketName(channelName);
+        ticket.setTicketOwnerID(owner.getIdLong());
+        ticket.setAdminOnlyMode(option.isAdminOnlyDefault());
+        ticket.setChannelID(channel.getIdLong());
+        ticket.setTicketID(option.getTicketID());
+        storage.getTickets().add(ticket);
+        heart.cnfMgr().save(storage);
+
+        channel.putPermissionOverride(member)
+                .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
+                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE, Permission.USE_SLASH_COMMANDS)
+                .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
+                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .queue();
+
+        channel.putPermissionOverride(guild.getPublicRole())
+                .setDeny(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE, Permission.MESSAGE_ATTACH_FILES,
+                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
+                        Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
+                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .queue();
+
+        if (option.isAdminOnlyDefault()) setTicketAdminOnly(ticket);
+        else setTicketNormalaMode(ticket);
+        List<String> toPing = Arrays.asList(owner.getAsMention());
+        if (option.isPingStaff()) {
+            if (option.getRolesToPing().isEmpty()) {
+                for (Long aLong : rolesToPing) {
+                    Role role = guild.getRoleById(aLong);
+                    if (role == null) continue;
+                    toPing.add(role.getAsMention());
+                }
+            } else {
+                for (Long aLong : option.getRolesToPing()) {
+                    Role role = guild.getRoleById(aLong);
+                    if (role == null) continue;
+                    toPing.add(role.getAsMention());
+                }
+            }
+        }
+        String pingMessage = heart.genMgr().formatStringList(toPing, ", ", false);
+        channel.sendMessage(pingMessage).queue();
+
+        String userInfo = "Linked IGN: `{ign}`\n" +
+                "Ticket Number: `" + newTicketNumber + "`\n" +
+                "Category: `" + category.getName() + "`\n";
+
+        channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                        .user(owner)
+                        .authorImg(owner.getEffectiveAvatarUrl())
+                        .authorName("New ticket from: {tag}")
+                        .fields(new MessageEmbed.Field[]{
+                                new MessageEmbed.Field("__Questions:__", "```" + heart.genMgr().formatStringList(option.getQuestions(), "\n", true) + "```", true),
+                                new MessageEmbed.Field("__Information:__", userInfo, true)
+                        })
+
+                        .build()))
+                .setActionRow(Button.danger("BUTTON_TICKET_CLOSE", closeTicketLabel).withEmoji(net.dv8tion.jda.api.entities.Emoji.fromMarkdown(closeTicketEmoji)),
+                        Button.success("BUTTON_TICKET_ADMIN_ONLY", adminOnlyLabel).withEmoji(net.dv8tion.jda.api.entities.Emoji.fromMarkdown(adminOnlyEmoji)))
+                .queue();
+
+        createTicketLogs(ticket, channel, owner);
+
+        return channel;
+    }
+
+    public void createTicketLogs(Ticket ticket, TextChannel channel, User owner) {
+        File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + channel.getId() + ".log");
+
+        String Zone = ZonedDateTime.now().getZone().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        Long ticketOwnerID = ticket.getTicketOwnerID();
+        String ticketOwnerAvatarURL = owner.getEffectiveAvatarUrl();
+        String ticketOwnerTag = owner.getAsTag();
+        boolean adminOnlyMode = ticket.isAdminOnlyMode();
+
+        StringBuilder toFile = new StringBuilder();
+        toFile.append("Ticket information:").append("\n");
+        toFile.append("     Channel ID: ").append(channel.getId()).append("\n");
+        toFile.append("     Channel Name: ").append(channel.getName()).append("\n");
+        toFile.append("     Ticket Owner ID: ").append(ticketOwnerID).append("\n");
+        toFile.append("     Ticket Owner Tag: ").append(ticketOwnerTag).append("\n");
+        toFile.append("     Ticket Owner Avatar: ").append(ticketOwnerAvatarURL).append("\n");
+        toFile.append("     Admin Only Mode: ").append(adminOnlyMode).append("\n");
+        toFile.append("Ticket logs (TimeZone: ").append(Zone).append("):");
+
+        heart.getTask(TaskRunTicketLogQueue.class).getToLog().add(new LogObject(toFile.toString(), ticketLogsFile));
+    }
+
+    public boolean isMaxTicketsOpen(User user) {
+        AtomicInteger count = new AtomicInteger(0);
+        storage.getTickets().stream().filter(ticket -> user.getIdLong() == ticket.getTicketOwnerID()).forEach(ticket -> count.incrementAndGet());
+        return count.get() > maxTicketsPerUser;
+    }
+
+    public TicketOption getTicketOptionById(String id) {
+        return ticketOptions.stream().filter(option -> option.getTicketID().equals(id)).findFirst().orElse(null);
+    }
+
+    public boolean hasPermission(CommandData configSection, ButtonClickEvent e) {
+        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.gCnf().isAdministratorBypassPermissions())
+            return true;
+        AtomicBoolean allowed = new AtomicBoolean(false);
+        if (configSection.isRequirePermission()) {
+            if (e.getMember() == null) return false;
+            configSection.getAllowedOverride().forEach(id -> {
+                Role role = heart.getJda().getRoleById(id.getAsLong());
+                if (role != null && e.getMember().getRoles().contains(role)) allowed.set(true);
+                else if (e.getUser().getIdLong() == id.getAsLong()) allowed.set(true);
+            });
+        } else allowed.set(true);
+        configSection.getBlockedOverride().forEach(id -> {
+            Role role = heart.getJda().getRoleById(id.getAsLong());
+            if (role != null && e.getMember() != null && e.getMember().getRoles().contains(role))
+                allowed.set(false);
+            else if (e.getUser().getIdLong() == id.getAsLong()) allowed.set(false);
+        });
+        return allowed.get();
+    }
+
+
+    @SneakyThrows
+    void closeTicket(Ticket ticket, String reason, User closer) {
+        File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + ticket.getChannelID() + ".log");
+        TextChannel channel = heart.getJda().getTextChannelById(ticket.getChannelID());
+        DiscordUser discordUser = heart.genMgr().getDiscordUser(closer);
+        String toFile = "\n\nClosed Ticket Information:\n " +
+                "  Ticket Closer Tag: " + closer.getAsTag() + "\n" +
+                "   Ticket Closer ID: " + closer.getId() + "\n" +
+                "   Ticket Close reason: " + reason;
+        heart.getTask(TaskRunTicketLogQueue.class).getToLog().add(new LogObject(toFile, ticketLogsFile));
+        heart.getTask(TaskRunTicketLogQueue.class).execute();
+        ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + ticket.getChannelID() + ".log");
+        User ticketOwner = heart.getJda().retrieveUserById(ticket.getTicketOwnerID()).complete();
+
+        discordUser.setTicketsClosed(discordUser.getTicketsClosed() + 1);
+        discordUser.save();
+
+        channel.delete().queueAfter(5, TimeUnit.SECONDS);
+
+        channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                .colorHexCode(heart.successColor())
+                .content("This ticket will close in 5 seconds.")
+                .build())).queue();
+
+        EmbedMaker.EmbedMakerBuilder embedMaker = EmbedMaker.builder()
+                .authorImg(ticketOwner.getEffectiveAvatarUrl())
+                .user(ticketOwner)
+                .author(closer)
+                .authorName("{tag}'s ticket was closed by {authorTag}")
+                .field(new MessageEmbed.Field("Ticket " + ticket.getTicketName(), "Close reason: `{reason}`".replace("{reason}", reason), false));
+
+        TextChannel logs;
+        if (ticket.isAdminOnlyMode()) logs = adminLogs;
+        else logs = ticketLogs;
+
+        if (logs != null) {
+            logs.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(embedMaker.build())).queueAfter(5, TimeUnit.MILLISECONDS);
+            logs.sendFile(ticketLogsFile).queueAfter(5 + 1000, TimeUnit.MILLISECONDS);
+        }
+
+        storage.getTickets().remove(ticket);
+        try {
+            ticketOwner.openPrivateChannel().complete().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(embedMaker.build())).completeAfter(5, TimeUnit.SECONDS);
+            embedMaker.authorName("Your ticket was closed by {authorTag}");
+            ticketOwner.openPrivateChannel().complete().sendFile(ticketLogsFile).queueAfter(6, TimeUnit.SECONDS);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+
+    // Create & Admin Only Handler
+    @Override
+    public void onButtonClick(@NotNull ButtonClickEvent e) {
+        if (e.getUser().isBot()) return;
+        if (e.getGuild() == null) return;
+        if (!heart.genMgr().isAllowedGuild(e.getGuild())) return;
+        if (e.getButton() == null || e.getButton().getId() == null) return;
+
+        if (heart.genMgr().getDiscordUser(e.getUser().getIdLong()).isBlacklisted()) {
+            e.reply("You are blacklisted from using this bot.").setEphemeral(true).queue();
+            return;
+        }
+
+
+        if ("BUTTON_TICKET_ADMIN_ONLY".equalsIgnoreCase(e.getButton().getId())) {
+
+            if (!hasPermission(heart.cmdCnf().getTicket().getCommandDataBySubCommandName("admin_only"), e)) {
+                e.reply("You don't have permission to use admin only.").setEphemeral(true).queue();
+            }
+
+            Ticket ticket = storage.getTicketByID(e.getChannel().getId());
+            if (ticket.isAdminOnlyMode()) {
+                ticket.setAdminOnlyMode(false);
+                setTicketNormalaMode(ticket);
+                e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is no longer admin only.").build())).queue();
+                return;
+            } else {
+                ticket.setAdminOnlyMode(true);
+                setTicketAdminOnly(ticket);
+                e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is now in admin only mode.").build())).queue();
+            }
+            heart.cnfMgr().save(storage);
+            return;
+        }
+        if ("BUTTON_TICKET_CLOSE".equalsIgnoreCase(e.getButton().getId())) {
+            Ticket ticket = storage.getTicketByID(e.getChannel().getId());
+            if (ticket == null) return;
+            if (!allowTicketOwnerToCloseOwnTicket && ticket.getTicketOwnerID() != e.getUser().getIdLong()) {
+                if (!hasPermission(heart.cmdCnf().getTicket().getCommandDataBySubCommandName("close"), e)) {
+                    e.reply("You don't have permission to close tickets.").setEphemeral(true).queue();
+                }
+            }
+            closeTicket(ticket, defaultCloseReason, e.getUser());
+            e.deferReply().queue();
+            return;
+        }
+
+        if (!e.getButton().getId().startsWith("TICKET_OPTION_")) return;
+        String ticketID = e.getButton().getId().replace("TICKET_OPTION_", "");
+        TicketOption ticketOption = getTicketOptionById(ticketID);
+        if (isMaxTicketsOpen(e.getUser())) {
+            e.reply("You have reached the maximum amount of tickets open. Please close one before creating a new one.").setEphemeral(true).queue();
+            return;
+        }
+        TextChannel channel = createTicket(ticketOption, e.getUser(), e.getGuild());
+        e.reply("Your ticket has been created. You can now start chatting in <#" + channel.getId() + ">").setEphemeral(true).queue();
+    }
+
+    // LOG HANDLING
+    @Override
+    @SneakyThrows
+    public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
+        if (!ticketCheck(e.getChannel())) return;
+        File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + e.getChannel().getId() + ".log");
+        StringBuilder toFile = new StringBuilder();
+        for (Message.Attachment attachment : e.getMessage().getAttachments()) {
+            toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+                    .append("[FILE]" + attachment.getUrl())
+                    .append("\n");
+        }
+        if (e.getMessage().getEmbeds().size() != 0) {
+            MessageEmbed embed = e.getMessage().getEmbeds().get(0);
+            toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+                    .append("[EMBED]" + "\n   Title: ")
+                    .append(embed.getTitle()).append("\n   Desc: ")
+                    .append(embed.getDescription()).append("\n");
+            if (embed.getFooter() != null) {
+                toFile.append("   Footer: ").append(embed.getFooter().getText());
+            }
+        } else {
+            if (!e.getMessage().getContentDisplay().equals("")) {
+                toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ").append(e.getMessage().getContentDisplay());
+            }
+        }
+        heart.getTask(TaskRunTicketLogQueue.class).getToLog().add(new LogObject(toFile.toString(), ticketLogsFile));
+    }
+
+    @Override
+    @SneakyThrows
+    public void onGuildMessageUpdate(GuildMessageUpdateEvent e) {
+        if (!ticketCheck(e.getChannel())) return;
+        File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + e.getChannel().getId() + ".log");
+        StringBuilder toFile = new StringBuilder();
+
+        toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+                .append("[MESSAGE EDIT]" + e.getMessage().getContentDisplay())
+                .append("\n");
+
+        heart.getTask(TaskRunTicketLogQueue.class).getToLog().add(new LogObject(toFile.toString(), ticketLogsFile));
+    }
 }

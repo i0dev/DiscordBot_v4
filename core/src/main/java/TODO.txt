@@ -1,0 +1,32 @@
+Absence check for configuration.
+
+Help pages
+
+Giveaways modules
+
+Member counter channel misc config
+
+New verifification system
+
+Continiuous roles
+
+assure muted
+
+unmute & unban after expire
+
+ingame linking
+
+movement
+
+gamemode
+
+auto mod
+
+welcome messages
+
+2fa
+
+leave join logs
+
+logs for moderation cmds
+

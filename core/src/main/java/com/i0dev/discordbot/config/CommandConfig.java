@@ -101,15 +101,21 @@ public class CommandConfig extends AbstractConfiguration {
             .addOption("ticketCreateChannel", 0L)
             .addOption("ticketLogsChannel", 0L)
             .addOption("adminOnlyLabel", "Admin Only")
+            .addOption("maxTicketsPerUser", 4L)
             .addOption("closeTicketLabel", "Close")
             .addOption("adminOnlyEmoji", "U+1F514")
             .addOption("closeTicketEmoji", "U+1F5D1")
             .addOption("ticketTopLimit", 20L)
+            .addOption("rolesToPing", new ArrayList<>())
+            .addOption("defaultCloseReason","Have a great day!")
+            .addOption("allowTicketOwnerToCloseOwnTicket", true)
+            .addOption("defaultCategory", 879086812776239166L)
             .addOption("buttonsEnabled", true)
             .addOption("adminOnlySeeRoles", Arrays.asList(0L, 0L))
             .addOption("rolesToSeeTickets", Arrays.asList(0L, 0L))
             .addOption("ticketOptions", Arrays.asList(
                     new TicketOption(
+                            "support",
                             Arrays.asList("What is your IGN", "What realm is this ticket for?"),
                             0L,
                             "support-{num}",
@@ -122,6 +128,7 @@ public class CommandConfig extends AbstractConfiguration {
                             new ArrayList<>()
                     ),
                     new TicketOption(
+                            "admin",
                             Arrays.asList("What is your IGN", "What realm is this ticket for?"),
                             0L,
                             "admin-{num}",

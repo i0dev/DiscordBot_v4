@@ -8,6 +8,9 @@ import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,9 +59,7 @@ public class GeneralManager extends AbstractManager {
     }
 
     public String formatStringList(List<String> list, String determiner, boolean capitalizeFirst) {
-
         StringBuilder sb = new StringBuilder();
-
         ArrayList<String> stripped = new ArrayList<>();
         for (String s : list) {
             if (capitalizeFirst)
@@ -125,6 +126,18 @@ public class GeneralManager extends AbstractManager {
             }
         }
         return time * 1000L;
+    }
+
+    public String formatDate(Long instant) {
+        ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(instant), ZoneId.of("America/New_York"));
+        String Month = time.getMonth().getValue() + "";
+        String Day = time.getDayOfMonth() + "";
+        String Year = time.getYear() + "";
+        String Hour = time.getHour() + "";
+        String Minute = time.getMinute() + "";
+        String Second = time.getSecond() + "";
+
+        return "[" + Month + "/" + Day + "/" + Year + " " + Hour + ":" + Minute + ":" + Second + "]";
     }
 
 }

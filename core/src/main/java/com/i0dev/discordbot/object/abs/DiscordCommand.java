@@ -82,13 +82,6 @@ public abstract class DiscordCommand extends ListenerAdapter {
         return getConfigSection().getOptions().get(key).getAsJsonArray();
     }
 
-    protected <T> List<T> getConfigOptionList(String key) {
-        List<T> ret = new ArrayList<>();
-        JsonArray arr = getConfigSection().getOptions().get(key).getAsJsonArray();
-        arr.forEach(jsonElement -> ret.add((T) jsonElement));
-        return ret;
-    }
-
     protected String getConfigMessage(String key) {
         return getConfigSection().getMessages().get(key).getAsString();
     }
