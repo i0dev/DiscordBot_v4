@@ -1,0 +1,24 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+dependencies {
+    implementation project(':common')
+    compileOnly 'net.md-5:bungeecord-api:1.16-R0.3'
+}
+
+repositories {
+    mavenCentral()
+}
+
+shadowJar {
+    archiveFileName = 'DiscordBot-bungee.jar'
+
+    dependencies {
+        include(dependency('com.i0dev.discordbot:.*'))
+    }
+}
+
+artifacts {
+    archives shadowJar
+}

@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'DiscordBot'
+include(
+        'bukkit',
+        'bungeecord',
+        'common'
+)
