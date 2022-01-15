@@ -13,8 +13,8 @@ import java.util.List;
 public class CommandDataCacheStorage extends AbstractConfiguration {
 
     public CommandDataCacheStorage(Heart heart, String path) {
-        super(heart, path);
-    }
+        this.path = path;
+        this.heart = heart;    }
 
     List<String> cache = new ArrayList<>();
 

@@ -9,6 +9,7 @@ import com.i0dev.discordbot.command.moderation.*;
 import com.i0dev.discordbot.config.*;
 import com.i0dev.discordbot.config.configs.TicketConfig;
 import com.i0dev.discordbot.config.storage.CommandDataCacheStorage;
+import com.i0dev.discordbot.config.storage.GiveawayStorage;
 import com.i0dev.discordbot.config.storage.SuggestionStorage;
 import com.i0dev.discordbot.config.storage.TicketStorage;
 import com.i0dev.discordbot.manager.*;
@@ -19,6 +20,7 @@ import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.abs.AbstractTask;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
+import com.i0dev.discordbot.task.TaskExecuteGiveaways;
 import com.i0dev.discordbot.task.TaskExecuteRoleQueue;
 import com.i0dev.discordbot.task.TaskRunTicketLogQueue;
 import com.i0dev.discordbot.task.TaskUpdateDiscordActivity;
@@ -99,6 +101,7 @@ public class Heart {
                 new CommandDataCacheStorage(this, getDataFolder() + "/storage/cmdCache.json"),
                 new SuggestionStorage(this, getDataFolder() + "/storage/suggestions.json"),
                 new TicketStorage(this, getDataFolder() + "/storage/tickets.json"),
+                new GiveawayStorage(this, getDataFolder() + "/storage/giveaways.json"),
 
                 new PermissionConfig(this, getDataFolder() + "/config/permissionConfig.json"),
                 new TicketConfig(this, getDataFolder() + "/config/ticketConfig.json")
@@ -112,7 +115,8 @@ public class Heart {
         tasks.addAll(Arrays.asList(
                 new TaskExecuteRoleQueue(this),
                 new TaskUpdateDiscordActivity(this),
-                new TaskRunTicketLogQueue(this)
+                new TaskRunTicketLogQueue(this),
+                new TaskExecuteGiveaways(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
@@ -148,7 +152,8 @@ public class Heart {
                 new CmdSuggestion(this),
                 new CmdInvite(this),
                 new CmdMute(this),
-                new CmdAvatar(this)
+                new CmdAvatar(this),
+                new CmdGiveaway(this)
         ));
         commands.forEach(command -> {
             command.initialize();

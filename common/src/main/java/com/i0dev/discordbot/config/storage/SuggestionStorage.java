@@ -16,8 +16,8 @@ import java.util.List;
 public class SuggestionStorage extends AbstractConfiguration {
 
     public SuggestionStorage(Heart heart, String path) {
-        super(heart, path);
-    }
+        this.path = path;
+        this.heart = heart;    }
 
     List<Suggestion> suggestions = new ArrayList<>();
 

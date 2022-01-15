@@ -16,8 +16,8 @@ import java.util.List;
 public class TicketStorage extends AbstractConfiguration {
 
     public TicketStorage(Heart heart, String path) {
-        super(heart, path);
-    }
+        this.path = path;
+        this.heart = heart;    }
 
 
     long ticketNumber = 1;

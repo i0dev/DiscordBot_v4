@@ -13,7 +13,8 @@ import java.util.List;
 @Data
 public class TicketConfig extends AbstractConfiguration {
     public TicketConfig(Heart heart, String path) {
-        super(heart, path);
+        this.path = path;
+        this.heart = heart;
     }
 
     long ticketLogsChannelID = 0L;

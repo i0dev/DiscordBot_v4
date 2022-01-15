@@ -14,8 +14,8 @@ import java.util.List;
 @Setter
 public class PermissionConfig extends AbstractConfiguration {
     public PermissionConfig(Heart heart, String path) {
-        super(heart, path);
-    }
+        this.path = path;
+        this.heart = heart;    }
 
     List<PermissionNode> permissions = Arrays.asList(
             new PermissionNode(
