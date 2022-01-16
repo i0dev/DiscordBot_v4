@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
 public class CmdCoinflip extends DiscordCommand {
@@ -21,7 +22,7 @@ public class CmdCoinflip extends DiscordCommand {
     public void execute(SlashCommandEvent e, CommandEventData data) {
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
-                .content("You flipped a coin and you got: `{flip}`".replace("{flip}", heart.genMgr().randomNumber(2) == 1 ? "Heads" : "Tails"))
+                .content("You flipped a coin and you got: `{flip}`".replace("{flip}", Utility.randomNumber(2) == 1 ? "Heads" : "Tails"))
                 .colorHexCode(heart.successColor())
                 .build());
     }

@@ -21,8 +21,8 @@ public class TaskUpdateDiscordActivity extends AbstractTask {
 
     @Override
     public void execute() {
-        String activity = heart.msgMgr().replacePlaceholders(heart.gCnf().getActivity());
-        switch (heart.gCnf().getActivityType().toLowerCase()) {
+        String activity = heart.msgMgr().replacePlaceholders(heart.cnf().getActivity());
+        switch (heart.cnf().getActivityType().toLowerCase()) {
             case "watching":
                 heart.getJda().getPresence().setActivity(Activity.watching(activity));
                 break;

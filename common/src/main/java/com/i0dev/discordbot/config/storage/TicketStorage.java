@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.command.Ticket;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Getter
 @ToString
 @Setter
+@NoArgsConstructor
 public class TicketStorage extends AbstractConfiguration {
 
     public TicketStorage(Heart heart, String path) {

@@ -4,13 +4,19 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.command.TicketOption;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+
 public class TicketConfig extends AbstractConfiguration {
     public TicketConfig(Heart heart, String path) {
         this.path = path;
@@ -26,6 +32,9 @@ public class TicketConfig extends AbstractConfiguration {
 
     boolean ticketCreateButtonMode = true;
     boolean allowTicketOwnerToCloseOwnTicket = true;
+    boolean allowTicketOwnerToAdminOnly = true;
+
+    String ticketPanelDescription = "Click the corresponding button to create a ticket. If the matter of the ticket has sensitive information, please ask for the ticket to be made admin-only.";
 
     String defaultCloseReason = "Have a wonderful day!";
     String adminOnlyButtonLabel = "Admin Only";
@@ -50,7 +59,8 @@ public class TicketConfig extends AbstractConfiguration {
                     false,
                     false,
                     new ArrayList<>(),
-                    new ArrayList<>()
+                    new ArrayList<>(),
+                    true
             ),
             new TicketOption(
                     "admin",
@@ -63,6 +73,7 @@ public class TicketConfig extends AbstractConfiguration {
                     true,
                     true,
                     new ArrayList<>(),
-                    new ArrayList<>()
+                    new ArrayList<>(),
+                    true
             ));
 }

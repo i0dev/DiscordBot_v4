@@ -25,6 +25,7 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:3.14.9'
     api 'com.zaxxer:HikariCP:4.0.3'
     api 'org.mongodb:mongo-java-driver:3.12.8'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 }
 
 repositories {

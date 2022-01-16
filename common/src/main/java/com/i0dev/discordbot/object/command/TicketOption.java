@@ -17,4 +17,5 @@ public class TicketOption {
     boolean pingStaff, adminOnlyDefault;
     List<Long> rolesToPing;
     List<Long> rolesToSee;
+    boolean requireLink;
 }

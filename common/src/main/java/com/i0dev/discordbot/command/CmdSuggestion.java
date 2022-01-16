@@ -6,6 +6,7 @@ import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.command.Suggestion;
+import com.i0dev.discordbot.util.ConfigUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -31,12 +32,12 @@ public class CmdSuggestion extends DiscordCommand {
 
     @Override
     public void initialize() {
-        pending = heart.getJda().getTextChannelById(heart.gCnf().getSuggestionPendingChannel());
-        accepted = heart.getJda().getTextChannelById(heart.gCnf().getSuggestionAcceptedChannel());
-        denied = heart.getJda().getTextChannelById(heart.gCnf().getSuggestionDeniedChannel());
+        pending = heart.getJda().getTextChannelById(heart.cnf().getSuggestionPendingChannel());
+        accepted = heart.getJda().getTextChannelById(heart.cnf().getSuggestionAcceptedChannel());
+        denied = heart.getJda().getTextChannelById(heart.cnf().getSuggestionDeniedChannel());
         storage = heart.getConfig(SuggestionStorage.class);
-        upvoteEmoji = Emoji.fromMarkdown(heart.gCnf().getSuggestionUpvoteEmoji());
-        downvoteEmoji = Emoji.fromMarkdown(heart.gCnf().getSuggestionDownvoteEmoji());
+        upvoteEmoji = Emoji.fromMarkdown(heart.cnf().getSuggestionUpvoteEmoji());
+        downvoteEmoji = Emoji.fromMarkdown(heart.cnf().getSuggestionDownvoteEmoji());
     }
 
     @Override
@@ -87,7 +88,7 @@ public class CmdSuggestion extends DiscordCommand {
 
         Suggestion sugObj = new Suggestion(msg.getIdLong(), pending.getIdLong(), e.getUser().getIdLong(), suggestion, gamemode);
         storage.getSuggestions().add(sugObj);
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
 
         msg.addReaction(upvoteEmoji.getAsMention()).queue();
         msg.addReaction(downvoteEmoji.getAsMention()).queue();
@@ -112,7 +113,7 @@ public class CmdSuggestion extends DiscordCommand {
         if (channel == null) {
             data.replyFailure("The channel no longer exists for that suggestion.");
             storage.getSuggestions().remove(suggestion);
-            heart.cnfMgr().save(storage);
+            ConfigUtil.save(storage);
             return;
         }
         Message message = channel.retrieveMessageById(id).complete();
@@ -142,7 +143,7 @@ public class CmdSuggestion extends DiscordCommand {
         )).queue();
 
         storage.getSuggestions().remove(suggestion);
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
@@ -166,7 +167,7 @@ public class CmdSuggestion extends DiscordCommand {
         if (channel == null) {
             data.replyFailure("The channel no longer exists for that suggestion.");
             storage.getSuggestions().remove(suggestion);
-            heart.cnfMgr().save(storage);
+            ConfigUtil.save(storage);
             return;
         }
         Message message = channel.retrieveMessageById(id).complete();
@@ -195,7 +196,7 @@ public class CmdSuggestion extends DiscordCommand {
         )).queue();
 
         storage.getSuggestions().remove(suggestion);
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())

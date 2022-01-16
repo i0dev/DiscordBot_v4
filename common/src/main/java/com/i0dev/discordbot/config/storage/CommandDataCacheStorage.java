@@ -2,13 +2,16 @@ package com.i0dev.discordbot.config.storage;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
+import com.i0dev.discordbot.util.ConfigUtil;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
 @Setter
 public class CommandDataCacheStorage extends AbstractConfiguration {
 
@@ -25,7 +28,7 @@ public class CommandDataCacheStorage extends AbstractConfiguration {
 
     public void removeCmdDataByID(String id) {
         cache.remove(getCmdData(id));
-        heart.cnfMgr().save(this, path);
+        ConfigUtil.save(this, path);
     }
 
 }

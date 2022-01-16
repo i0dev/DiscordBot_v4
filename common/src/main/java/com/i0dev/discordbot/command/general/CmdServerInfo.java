@@ -5,6 +5,7 @@ import com.i0dev.discordbot.object.Requirement;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -64,7 +65,7 @@ public class CmdServerInfo extends DiscordCommand {
                 .fields(new MessageEmbed.Field[]{
                         new MessageEmbed.Field("__General Info__", general.toString(), true),
                         new MessageEmbed.Field("__Member Info__", memberInfo.toString(), true),
-                        new MessageEmbed.Field("__Server Emotes (Showing {x} out of {max} emojis)__".replace("{max}", guild.getEmotes().size() + "").replace("{x}", (guild.getEmotes().size() - toRemove.size()) + ""), heart.genMgr().formatStringList(emotes, ", ", true), false)
+                        new MessageEmbed.Field("__Server Emotes (Showing {x} out of {max} emojis)__".replace("{max}", guild.getEmotes().size() + "").replace("{x}", (guild.getEmotes().size() - toRemove.size()) + ""), Utility.formatStringList(emotes, ", ", true), false)
                 })
                 .authorName(guild.getName() + "'s Server Information")
                 .authorImg(guild.getIconUrl())

@@ -72,8 +72,8 @@ public class MessageManager extends AbstractManager {
             message = message
                     .replace("{tag}", user.getAsTag())
                     .replace("{mention}", user.getAsMention())
+                    .replace("{inviter}", heart.genMgr().retrieveUser(discordUser.getInvitedByID()) == null ? "Unknown" : heart.genMgr().retrieveUser(discordUser.getInvitedByID()).getAsTag())
                     .replace("{id}", user.getId())
-                    .replace("{muteExpiry}", discordUser.getUnmuteAtTime() == 0 ? "`Not Muted`" : discordUser.getUnmuteAtTime() == -1 ? "`Never`" : "<t:" + discordUser.getUnmuteAtTime() / 1000 + ":R>")
                     .replace("{blacklisted}", discordUser.isBlacklisted() ? "Yes" : "No")
                     .replace("{boosts}", discordUser.getTotalBoostCount() + "")
                     .replace("{ticketsClosed}", discordUser.getTicketsClosed() + "")
@@ -88,6 +88,7 @@ public class MessageManager extends AbstractManager {
             if (guild != null && guild.getMember(user) != null) {
                 Member member = guild.getMember(user);
                 message = message
+                        .replace("{timedOut}", member.isTimedOut() ? "Yes" : "No")
                         .replace("{isBoosting}", guild.getBoosters().contains(member) ? "Yes" : "No");
             }
         }

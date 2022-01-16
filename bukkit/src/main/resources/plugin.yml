@@ -2,5 +2,16 @@ name: DiscordBot
 version: 4.0.0
 main: com.i0dev.discordbot.bukkit.BukkitMain
 author: i01
-softdepend: [Vault]
+softdepend: [ Vault ]
 api-version: 1.13
+
+commands:
+  DiscordBot:
+    aliases: [ ]
+    description: The main command for the discord bot
+    usage: /DiscordBot
+  Link:
+    aliases:
+      - discordLink
+    description: Link your discord account to your minecraft account
+    usage: /Link generate

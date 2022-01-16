@@ -5,6 +5,7 @@ import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -108,7 +109,7 @@ public class CmdBlacklist extends DiscordCommand {
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
-                .content(heart.genMgr().formatStringList(list, "\n", false))
+                .content(Utility.formatStringList(list, "\n", false))
                 .title("Blacklisted Users")
                 .colorHexCode(heart.successColor())
                 .build());

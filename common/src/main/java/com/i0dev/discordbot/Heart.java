@@ -20,10 +20,9 @@ import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.abs.AbstractTask;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
-import com.i0dev.discordbot.task.TaskExecuteGiveaways;
-import com.i0dev.discordbot.task.TaskExecuteRoleQueue;
-import com.i0dev.discordbot.task.TaskRunTicketLogQueue;
-import com.i0dev.discordbot.task.TaskUpdateDiscordActivity;
+import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.task.*;
+import com.i0dev.discordbot.util.ConfigUtil;
 import com.i0dev.discordbot.util.ConsoleColors;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +31,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -84,16 +84,18 @@ public class Heart {
     public void startup() {
         getDataFolder().mkdir();
         new File(getDataFolder() + "/storage/").mkdir();
-        new File(getDataFolder() + "/config/").mkdir();
+        new File(getDataFolder() + "/configs/").mkdir();
 
 
         managers.addAll(Arrays.asList(
                 new DiscordCommandManager(this),
-                new ConfigManager(this),
                 new GeneralManager(this),
                 new APIManager(this),
                 new SQLManager(this),
-                new MessageManager(this)
+                new MessageManager(this),
+                new LinkManager(this),
+                new InviteManager(this),
+                new AutoModManager(this)
         ));
         configs.addAll(Arrays.asList(
                 new GeneralConfig(this, getDataFolder() + "/config.json"),
@@ -103,8 +105,9 @@ public class Heart {
                 new TicketStorage(this, getDataFolder() + "/storage/tickets.json"),
                 new GiveawayStorage(this, getDataFolder() + "/storage/giveaways.json"),
 
-                new PermissionConfig(this, getDataFolder() + "/config/permissionConfig.json"),
-                new TicketConfig(this, getDataFolder() + "/config/ticketConfig.json")
+                new PermissionConfig(this, getDataFolder() + "/configs/permissionConfig.json"),
+                new AutoModConfig(this, getDataFolder() + "/configs/autoModConfig.json"),
+                new TicketConfig(this, getDataFolder() + "/configs/ticketConfig.json")
 
         ));
         managers.forEach(AbstractManager::initialize);
@@ -116,7 +119,8 @@ public class Heart {
                 new TaskExecuteRoleQueue(this),
                 new TaskUpdateDiscordActivity(this),
                 new TaskRunTicketLogQueue(this),
-                new TaskExecuteGiveaways(this)
+                new TaskExecuteGiveaways(this),
+                new TaskAutoGiveRoles(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
@@ -153,15 +157,16 @@ public class Heart {
                 new CmdInvite(this),
                 new CmdMute(this),
                 new CmdAvatar(this),
+                new CmdLink(this),
                 new CmdGiveaway(this)
         ));
         commands.forEach(command -> {
             command.initialize();
             /* TEMPORARY */
-            jda.getGuilds().get(0).upsertCommand(command.toData()).queue();
+            jda.getGuilds().forEach(guild -> guild.upsertCommand(command.toData()).queue());
             if (command.isRegisterListener()) jda.addEventListener(command);
         });
-        cnfMgr().save(cmdCacheStrg(), cmdCacheStrg().path);
+        ConfigUtil.save(cmdCacheStrg(), cmdCacheStrg().path);
         //  upsertCommands();
         //  updateCommands();
     }
@@ -176,11 +181,11 @@ public class Heart {
         List<CommandData> toUpdate = new ArrayList<>();
         for (DiscordCommand discordCommand : commands) {
             if (discordCommand == null) return;
-            if (!cnfMgr().ObjectToJson(discordCommand.toData(), false).equalsIgnoreCase(cmdCacheStrg().getCmdData(discordCommand.getCommand()))) {
+            if (!ConfigUtil.ObjectToJson(discordCommand.toData(), false).equalsIgnoreCase(cmdCacheStrg().getCmdData(discordCommand.getCommand()))) {
                 toUpdate.add(discordCommand.toData());
                 cmdCacheStrg().removeCmdDataByID(discordCommand.getCommand());
-                cmdCacheStrg().getCache().add(cnfMgr().ObjectToJson(discordCommand.toData(), false));
-                cnfMgr().save(cmdCacheStrg(), cmdCacheStrg().path);
+                cmdCacheStrg().getCache().add(ConfigUtil.ObjectToJson(discordCommand.toData(), false));
+                ConfigUtil.save(cmdCacheStrg(), cmdCacheStrg().path);
                 logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "Updated command: " + ConsoleColors.PURPLE_BOLD + discordCommand.getCommand() + ConsoleColors.RESET);
             }
         }
@@ -192,8 +197,8 @@ public class Heart {
             if (cmdCacheStrg().getCmdData(discordCommand.getCommand()) != null) continue;
             jda.upsertCommand(discordCommand.toData()).queue();
             logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "Sent a request to add a new command: " + ConsoleColors.PURPLE_BOLD + discordCommand.getCommand() + ConsoleColors.RESET);
-            cmdCacheStrg().getCache().add(cnfMgr().ObjectToJson(discordCommand.toData(), false));
-            cnfMgr().save(cmdCacheStrg(), cmdCacheStrg().path);
+            cmdCacheStrg().getCache().add(ConfigUtil.ObjectToJson(discordCommand.toData(), false));
+            ConfigUtil.save(cmdCacheStrg(), cmdCacheStrg().path);
         }
     }
 
@@ -213,7 +218,7 @@ public class Heart {
 
     @SneakyThrows
     public void createJDA() {
-        jda = JDABuilder.create(gCnf().getBotToken(), EnumSet.allOf(GatewayIntent.class))
+        jda = JDABuilder.create(cnf().getBotToken(), EnumSet.allOf(GatewayIntent.class))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .setContextEnabled(true)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -225,7 +230,7 @@ public class Heart {
 
     public void registerConfigs() {
         ArrayList<Pair<AbstractConfiguration, AbstractConfiguration>> toReplace = new ArrayList<>();
-        configs.forEach(abstractConfiguration -> toReplace.add(new Pair<>(abstractConfiguration, cnfMgr().load(abstractConfiguration, this))));
+        configs.forEach(abstractConfiguration -> toReplace.add(new Pair<>(abstractConfiguration, ConfigUtil.load(abstractConfiguration, this))));
         toReplace.forEach(pairs -> {
             configs.remove(pairs.getKey());
             configs.add(pairs.getValue());
@@ -246,7 +251,7 @@ public class Heart {
 
     public List<Guild> getAllowedGuilds() {
         List<Guild> ret = new ArrayList<>();
-        gCnf().getVerifiedGuilds().forEach(guildId -> {
+        cnf().getVerifiedGuilds().forEach(guildId -> {
             Guild guild = jda.getGuildById(guildId);
             if (guild != null) ret.add(guild);
         });
@@ -261,21 +266,27 @@ public class Heart {
         logger.log(Level.INFO, ConsoleColors.YELLOW + "-> " + ConsoleColors.WHITE_BOLD + message + ConsoleColors.RESET);
     }
 
+    public void logDiscord(EmbedMaker embedMaker) {
+        TextChannel channel = jda.getTextChannelById(cnf().getLogsChannel());
+        if (channel == null) return;
+        channel.sendMessageEmbeds(msgMgr().createMessageEmbed(embedMaker)).queue();
+    }
+
     public JsonArray listToJsonArr(Object object) {
         return new Gson().fromJson(new Gson().toJson(object), JsonArray.class);
     }
 
     // Color Shortcuts
     public String normalColor() {
-        return gCnf().getNormalColor();
+        return cnf().getNormalColor();
     }
 
     public String failureColor() {
-        return gCnf().getFailureColor();
+        return cnf().getFailureColor();
     }
 
     public String successColor() {
-        return gCnf().getSuccessColor();
+        return cnf().getSuccessColor();
     }
 
     // START Tags
@@ -312,16 +323,12 @@ public class Heart {
 
     // Shortcuts for getting managers
 
-    public GeneralConfig gCnf() {
+    public GeneralConfig cnf() {
         return getConfig(GeneralConfig.class);
     }
 
     public CommandDataCacheStorage cmdCacheStrg() {
         return getConfig(CommandDataCacheStorage.class);
-    }
-
-    public ConfigManager cnfMgr() {
-        return getManager(ConfigManager.class);
     }
 
     public DiscordCommandManager dscCmdMgr() {

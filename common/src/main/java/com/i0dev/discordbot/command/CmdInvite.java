@@ -5,6 +5,7 @@ import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -70,7 +71,7 @@ public class CmdInvite extends DiscordCommand {
     @SneakyThrows
     public void leaderboard(SlashCommandEvent e, CommandEventData data) {
         List<String> list = new ArrayList<>();
-        ResultSet result = heart.sqlMgr().runQueryWithResult("select * from DiscordUser order by discordInvites desc limit " + heart.gCnf().getInviteLeaderboardMaxDisplay());
+        ResultSet result = heart.sqlMgr().runQueryWithResult("select * from DiscordUser order by discordInvites desc limit " + heart.cnf().getInviteLeaderboardMaxDisplay());
         int place = 1;
         while (result.next()) {
             long id = result.getLong("id");
@@ -94,7 +95,7 @@ public class CmdInvite extends DiscordCommand {
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
                 .title("Invited Users Leaderboard")
-                .content(heart.genMgr().formatStringList(list, "\n", false))
+                .content(Utility.formatStringList(list, "\n", false))
                 .colorHexCode(heart.successColor())
                 .build());
 

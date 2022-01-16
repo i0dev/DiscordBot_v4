@@ -5,7 +5,6 @@ package com.i0dev.discordbot.object.command;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.config.storage.GiveawayStorage;
 import com.i0dev.discordbot.manager.MessageManager;
-import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.util.ConfigUtil;
 import com.i0dev.discordbot.util.Utility;
@@ -22,8 +21,6 @@ import lombok.NoArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
@@ -53,7 +50,7 @@ public class Giveaway {
         User host = heart.getJda().getUserById(this.hostID);
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.copyFrom(message.getEmbeds().get(0));
-        embedBuilder.setTitle("Giveaway ended!");
+        embedBuilder.setAuthor("Giveaway ended!", message.getEmbeds().get(0).getAuthor().getUrl(), message.getEmbeds().get(0).getAuthor().getIconUrl());
         message.editMessageEmbeds(new MessageEmbed[]{embedBuilder.build()}).queue();
         List<User> selectionPool = (message.getReactions().get(0)).retrieveUsers().stream().collect(Collectors.toList());
         selectionPool.removeIf(User::isBot);
@@ -63,21 +60,26 @@ public class Giveaway {
             winners.add(selectionPool.get(ThreadLocalRandom.current().nextInt(selectionPool.size())));
         }
 
-        this.getChannel(heart).sendMessageEmbeds(this.getGiveawayEndMessage(heart, rerolled, winners), new MessageEmbed[0]).queue();
-        String winnersContent = heart.gCnf().getWonGiveawayFormat().replace("{prize}", this.prize).replace("{tag}", host.getAsTag()).replace("{time}", "<t:" + this.endTime / 1000L + ":R>");
+        this.getChannel(heart).sendMessageEmbeds(this.getGiveawayEndMessage(heart, rerolled, winners, selectionPool.size()), new MessageEmbed[0]).queue();
+        String winnersContent = heart.cnf().getWonGiveawayFormat().replace("{prize}", this.prize).replace("{tag}", host.getAsTag()).replace("{time}", "<t:" + this.endTime / 1000L + ":R>");
         winners.forEach((user) -> (user.openPrivateChannel().complete()).sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().authorImg(heart.getJda().getSelfUser().getEffectiveAvatarUrl()).authorName("You won a giveaway!").authorURL("https://discordapp.com/channels/" + this.getChannel(heart).getGuild().getId() + "/" + this.channelID + "/" + this.messageID).content(winnersContent).colorHexCode(heart.successColor()).build()), new MessageEmbed[0]).queue());
         this.ended = true;
-        ConfigUtil.save((AbstractConfiguration) heart.getConfig(GiveawayStorage.class));
+        ConfigUtil.save(heart.getConfig(GiveawayStorage.class));
     }
 
-    private MessageEmbed getGiveawayEndMessage(Heart heart, boolean rerolled, List<User> winners) {
+    private MessageEmbed getGiveawayEndMessage(Heart heart, boolean rerolled, List<User> winners, long entries) {
         User host = heart.getJda().getUserById(this.hostID);
         String content = "No one entered the giveaway!";
         if (winners.size() != 0) {
-            content = heart.gCnf().getEndGiveawayFormat().replace("{prize}", this.prize).replace("{s}", winners.size() == 1 ? "" : "s").replace("{winners}", this.formatWinners(winners)).replace("{time}", "<t:" + this.endTime / 1000L + ":R>");
+            content = heart.cnf().getEndGiveawayFormat()
+                    .replace("{prize}", this.prize)
+                    .replace("{s}", winners.size() == 1 ? "" : "s")
+                    .replace("{entries}", String.valueOf(entries))
+                    .replace("{winners}", this.formatWinners(winners))
+                    .replace("{time}", "<t:" + this.endTime / 1000L + ":R>");
         }
 
-        return ((MessageManager) heart.getManager(MessageManager.class)).createMessageEmbed(EmbedMaker.builder().authorName(rerolled ? "Giveaway rerolled!" : "Giveaway ended!").authorURL("https://discordapp.com/channels/" + this.getChannel(heart).getGuild().getId() + "/" + this.channelID + "/" + this.messageID).authorImg(heart.getJda().getSelfUser().getEffectiveAvatarUrl()).user(host).content(content).build());
+        return heart.getManager(MessageManager.class).createMessageEmbed(EmbedMaker.builder().authorName(rerolled ? "Giveaway rerolled!" : "Giveaway ended!").authorURL("https://discordapp.com/channels/" + this.getChannel(heart).getGuild().getId() + "/" + this.channelID + "/" + this.messageID).authorImg(heart.getJda().getSelfUser().getEffectiveAvatarUrl()).user(host).content(content).build());
     }
 
     private String formatWinners(List<User> list) {

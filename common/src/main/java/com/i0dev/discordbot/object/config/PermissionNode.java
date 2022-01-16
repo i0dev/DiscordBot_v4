@@ -16,4 +16,7 @@ public class PermissionNode {
     List<Long> usersDenied;
     List<Long> rolesDenied;
 
+    boolean everyoneAllowed;
+    boolean requireAdministrator;
+
 }

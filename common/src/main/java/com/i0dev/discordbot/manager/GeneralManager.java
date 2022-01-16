@@ -3,16 +3,21 @@ package com.i0dev.discordbot.manager;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.AbstractManager;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.ISnowflake;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import com.i0dev.discordbot.object.builder.EmbedMaker;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class GeneralManager extends AbstractManager {
 
@@ -20,12 +25,12 @@ public class GeneralManager extends AbstractManager {
         super(heart);
     }
 
-    public String capitalizeFirst(String a) {
-        return a.substring(0, 1).toUpperCase() + a.substring(1).toLowerCase();
-    }
-
     public User retrieveUser(long id) {
-        return getHeart().getJda().retrieveUserById(id).complete();
+        try {
+            return heart.getJda().retrieveUserById(id).complete();
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     public DiscordUser getDiscordUser(ISnowflake iSnowflake) {
@@ -33,6 +38,7 @@ public class GeneralManager extends AbstractManager {
     }
 
     public DiscordUser getDiscordUser(long id) {
+        if (id == 0) return null;
         DiscordUser user = (DiscordUser) heart.sqlMgr().getObject("id", id, DiscordUser.class);
         if (user == null) {
             user = new DiscordUser(id, heart);
@@ -41,103 +47,73 @@ public class GeneralManager extends AbstractManager {
         return user;
     }
 
-    public String formatRolesList(List<Role> list) {
-
-        StringBuilder sb = new StringBuilder();
-
-        ArrayList<String> Stripped = new ArrayList<>();
-        for (Role s : list) {
-            Stripped.add(capitalizeFirst(s.getAsMention()));
-        }
-        for (int i = 0; i < Stripped.size(); i++) {
-            sb.append(Stripped.get(i));
-            if (Stripped.size() - 1 > i) {
-                sb.append(", ");
-            }
-        }
-        return sb.toString();
-    }
-
-    public String formatStringList(List<String> list, String determiner, boolean capitalizeFirst) {
-        StringBuilder sb = new StringBuilder();
-        ArrayList<String> stripped = new ArrayList<>();
-        for (String s : list) {
-            if (capitalizeFirst)
-                stripped.add(capitalizeFirst(s));
-            else stripped.add(s);
-        }
-
-        for (int i = 0; i < stripped.size(); i++) {
-            sb.append(stripped.get(i));
-            if (stripped.size() - 1 > i) {
-                sb.append(determiner);
-            }
-        }
-        return sb.toString();
-    }
-
-    public int randomNumber(int max) {
-        int num = Math.abs((int) (Math.random() * max));
-        if (num == 0)
-            randomNumber(max);
-        return num;
-    }
-
     public boolean isAllowedGuild(Guild guild) {
         return heart.getAllowedGuilds().contains(guild);
     }
 
-    public boolean isInt(String s) {
-        try {
-            Integer.parseInt(s);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+
+    /*
+    Welcome message handler
+     */
+    @Override
+    public void onGuildMemberJoin(GuildMemberJoinEvent e) {
+        if (!heart.cnf().isWelcomeMessagesEnabled()) return;
+        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getWelcomeMessageChannel());
+        if (channel == null) return;
+
+        heart.cnf().getWelcomeRolesToGive().stream().map(aLong -> heart.getJda().getRoleById(aLong)).collect(Collectors.toList()).stream().filter(Objects::nonNull).forEach(role -> {
+            DiscordUser user = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
+            user.addRole(role);
+        });
+
+        if (heart.cnf().isWelcomePingUser()) channel.sendMessage(e.getMember().getAsMention()).queue();
+
+        String image = heart.cnf().getWelcomeEmbedImageUrl() == null ? null : heart.cnf().getWelcomeEmbedImageUrl();
+        String thumbnail = heart.cnf().isWelcomeUserMemberAvatarAsThumbnail() ? e.getUser().getEffectiveAvatarUrl() : heart.getJda().getSelfUser().getEffectiveAvatarUrl();
+
+        channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                .title(heart.cnf().getWelcomeEmbedTitle())
+                .author(e.getUser())
+                .user(e.getUser())
+                .thumbnail(thumbnail)
+                .image(image)
+                .content(heart.cnf().getWelcomeEmbedContent())
+                .build())).queue();
+
+        /*
+        Join Logs
+         */
+        heart.getExecutorService().schedule(() -> {
+            if (heart.cnf().isJoinLogsEnabled()) {
+                TextChannel joinLogsChannel = heart.getJda().getTextChannelById(heart.cnf().getJoinLeaveLogsChannel());
+                if (joinLogsChannel == null) return;
+                joinLogsChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                        .authorImg(e.getUser().getEffectiveAvatarUrl())
+                        .user(e.getUser())
+                        .colorHexCode(heart.successColor())
+                        .title("Member Join Log")
+                        .content(heart.cnf().getJoinLogsFormat())
+                        .build())).queue();
+            }
+        }, 3, TimeUnit.SECONDS);
+    }
+
+    /*
+    Leave logs
+     */
+
+    @Override
+    public void onGuildMemberRemove(GuildMemberRemoveEvent e) {
+        if (heart.cnf().isLeaveLogsEnabled()) {
+            TextChannel leaveLogsChannel = heart.getJda().getTextChannelById(heart.cnf().getJoinLeaveLogsChannel());
+            if (leaveLogsChannel == null) return;
+            leaveLogsChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                    .authorImg(e.getUser().getEffectiveAvatarUrl())
+                    .user(e.getUser())
+                    .title("Member Leave Log")
+                    .colorHexCode(heart.failureColor())
+                    .content(heart.cnf().getLeaveLogsFormat())
+                    .build())).queue();
         }
     }
-
-    public long deserializeStringToMilliseconds(String input) {
-        input = input.toLowerCase();
-        if (input.isEmpty()) return -1;
-        int time = 0;
-        StringBuilder number = new StringBuilder();
-        for (char c : input.toCharArray()) {
-            if (isInt(String.valueOf(c))) {
-                number.append(c);
-                continue;
-            }
-            if (number.toString().isEmpty()) return -1;
-            int add = Integer.parseInt(number.toString());
-            switch (c) {
-                case 'w':
-                    add *= 7;
-                case 'd':
-                    add *= 24;
-                case 'h':
-                    add *= 60;
-                case 'm':
-                    add *= 60;
-                case 's':
-                    time += add;
-                    number.setLength(0);
-                    break;
-                default:
-                    return -1;
-            }
-        }
-        return time * 1000L;
-    }
-
-    public String formatDate(Long instant) {
-        ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(instant), ZoneId.of("America/New_York"));
-        String Month = time.getMonth().getValue() + "";
-        String Day = time.getDayOfMonth() + "";
-        String Year = time.getYear() + "";
-        String Hour = time.getHour() + "";
-        String Minute = time.getMinute() + "";
-        String Second = time.getSecond() + "";
-
-        return "[" + Month + "/" + Day + "/" + Year + " " + Hour + ":" + Minute + ":" + Second + "]";
-    }
-
 }

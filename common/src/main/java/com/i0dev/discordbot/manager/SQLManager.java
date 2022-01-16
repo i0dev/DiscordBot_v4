@@ -49,7 +49,7 @@ public class SQLManager extends AbstractManager {
     @SneakyThrows
     public void connect() {
         Class.forName("org.sqlite.JDBC");
-        DatabaseInformation db = heart.gCnf().getDatabase();
+        DatabaseInformation db = heart.cnf().getDatabase();
         String database = db.getName();
         if (db.isEnabled()) {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -72,7 +72,7 @@ public class SQLManager extends AbstractManager {
     }
 
     public List<String> getColumns(String table) throws SQLException {
-        if (heart.gCnf().getDatabase().isEnabled()) {
+        if (heart.cnf().getDatabase().isEnabled()) {
             PreparedStatement preparedStatement = connection.prepareStatement("SHOW COLUMNS FROM " + table + ";");
             ResultSet set = preparedStatement.executeQuery();
             List<String> columns = new ArrayList<>();
@@ -127,6 +127,7 @@ public class SQLManager extends AbstractManager {
             heart.logSpecial("Creating column " + ConsoleColors.PURPLE_BOLD + field.getName() + ConsoleColors.WHITE_BOLD + " in table " + ConsoleColors.PURPLE_BOLD + table + ConsoleColors.WHITE_BOLD + " with type " + ConsoleColors.PURPLE_BOLD + type);
             String query = "ALTER TABLE " + table + " ADD COLUMN " + field.getName() + " " + type + ";";
             Statement statement = connection.createStatement();
+            System.out.println("Query: " + query);
             statement.execute(query);
         }
 
@@ -139,6 +140,7 @@ public class SQLManager extends AbstractManager {
             heart.logSpecial("Removing column [" + ConsoleColors.PURPLE_BOLD + column + ConsoleColors.WHITE_BOLD + "] from " + ConsoleColors.PURPLE_BOLD + table + ConsoleColors.WHITE_BOLD + " during an absence check.");
             String query = "ALTER TABLE " + table + " DROP COLUMN " + column + ";";
             Statement statement = connection.createStatement();
+            System.out.println("Query: " + query);
             statement.execute(query);
         }
         columns.clear();

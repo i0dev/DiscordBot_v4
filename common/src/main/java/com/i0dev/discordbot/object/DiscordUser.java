@@ -54,7 +54,6 @@ public class DiscordUser {
     boolean banned = false;
 
     // Times
-    long unmuteAtTime = 0;
     long unbanAtTime = 0;
 
     public String getMinecraftSkinTexture() {

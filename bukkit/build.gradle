@@ -10,6 +10,12 @@ repositories {
 dependencies {
     implementation project(':common')
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation("net.dv8tion:JDA:5.0.0-alpha.4")
+
 }
 
 shadowJar {

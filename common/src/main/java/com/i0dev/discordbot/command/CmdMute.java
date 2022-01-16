@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -72,7 +73,7 @@ public class CmdMute extends DiscordCommand {
             member.timeoutFor(Duration.ofDays(28)).queue();
 
         } else {
-            long len = heart.genMgr().deserializeStringToMilliseconds(length);
+            long len = Utility.deserializeStringToMilliseconds(length);
             if (len == -1) {
                 data.reply(EmbedMaker.builder()
                         .content("Invalid time format. Enter in this format: `1w4m`, `1d4m2s` etc.")
@@ -130,7 +131,7 @@ public class CmdMute extends DiscordCommand {
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
-                .content(heart.genMgr().formatStringList(list, "\n", false))
+                .content(Utility.formatStringList(list, "\n", false))
                 .title("Muted Users")
                 .colorHexCode(heart.successColor())
                 .build());

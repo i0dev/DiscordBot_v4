@@ -12,6 +12,8 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.command.Ticket;
 import com.i0dev.discordbot.object.command.TicketOption;
 import com.i0dev.discordbot.task.TaskRunTicketLogQueue;
+import com.i0dev.discordbot.util.ConfigUtil;
+import com.i0dev.discordbot.util.Utility;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -42,7 +44,6 @@ public class CmdTicket extends DiscordCommand {
     public CmdTicket(Heart heart) {
         super(heart);
     }
-
 
     TicketConfig cnf;
     TicketStorage storage;
@@ -126,7 +127,7 @@ public class CmdTicket extends DiscordCommand {
             setTicketAdminOnly(ticket);
             data.replySuccess("Ticket is now in admin only mode.");
         }
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
     }
 
     public void close(SlashCommandEvent e, CommandEventData data) {
@@ -179,7 +180,7 @@ public class CmdTicket extends DiscordCommand {
 
         data.reply(EmbedMaker.builder()
                 .user(e.getUser())
-                .content(heart.genMgr().formatStringList(list, "\n", false))
+                .content(Utility.formatStringList(list, "\n", false))
                 .title("Tickets closed leaderboard")
                 .colorHexCode(heart.successColor())
                 .build());
@@ -190,7 +191,7 @@ public class CmdTicket extends DiscordCommand {
         String image = e.getOption("image") == null ? null : e.getOption("image").getAsString();
         StringBuilder msg = new StringBuilder();
 
-        msg.append("Click the button below to create a ticket.").append("\n\n");
+        msg.append(heart.getConfig(TicketConfig.class).getTicketPanelDescription()).append("\n\n");
 
         cnf.getTicketOptions().forEach(ticketOption -> msg.append(Emoji.fromMarkdown(ticketOption.getEmoji()).getAsMention()).append("** - ").append(ticketOption.getDisplayName()).append("**\n"));
 
@@ -245,7 +246,7 @@ public class CmdTicket extends DiscordCommand {
         String newTicketName = e.getOption("name").getAsString().replace(" ", "-") + ticket.getTicketNumber();
         ((TextChannel) e.getChannel()).getManager().setName(newTicketName).queue();
         ticket.setTicketName(newTicketName);
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
         data.replySuccess("Renamed the ticket to: " + newTicketName);
     }
 
@@ -329,7 +330,7 @@ public class CmdTicket extends DiscordCommand {
         ticket.setChannelID(channel.getIdLong());
         ticket.setTicketID(option.getTicketID());
         storage.getTickets().add(ticket);
-        heart.cnfMgr().save(storage);
+        ConfigUtil.save(storage);
 
         channel.putPermissionOverride(member)
                 .setAllow(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
@@ -365,7 +366,7 @@ public class CmdTicket extends DiscordCommand {
                 }
             }
         }
-        String pingMessage = heart.genMgr().formatStringList(toPing, ", ", false);
+        String pingMessage = Utility.formatStringList(toPing, ", ", false);
         channel.sendMessage(pingMessage).queue();
 
         String userInfo = "Linked IGN: `{ign}`\n" +
@@ -377,7 +378,7 @@ public class CmdTicket extends DiscordCommand {
                         .authorImg(owner.getEffectiveAvatarUrl())
                         .authorName("New ticket from: {tag}")
                         .fields(new MessageEmbed.Field[]{
-                                new MessageEmbed.Field("__Questions:__", "```" + heart.genMgr().formatStringList(option.getQuestions(), "\n", true) + "```", true),
+                                new MessageEmbed.Field("__Questions:__", "```" + Utility.formatStringList(option.getQuestions(), "\n", true) + "```", true),
                                 new MessageEmbed.Field("__Information:__", userInfo, true)
                         })
 
@@ -423,10 +424,6 @@ public class CmdTicket extends DiscordCommand {
         return cnf.getTicketOptions().stream().filter(option -> option.getTicketID().equals(id)).findFirst().orElse(null);
     }
 
-    public boolean hasPermission(ButtonClickEvent e) {
-        return e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.gCnf().isAdministratorBypassPermissions();
-    }
-
 
     @SneakyThrows
     void closeTicket(Ticket ticket, String reason, User closer) {
@@ -469,6 +466,7 @@ public class CmdTicket extends DiscordCommand {
         }
 
         storage.getTickets().remove(ticket);
+        ConfigUtil.save(storage);
         try {
             ticketOwner.openPrivateChannel().complete().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(embedMaker.build())).completeAfter(5, TimeUnit.SECONDS);
             embedMaker.authorName("Your ticket was closed by {authorTag}");
@@ -486,6 +484,7 @@ public class CmdTicket extends DiscordCommand {
         if (e.getGuild() == null) return;
         if (!heart.genMgr().isAllowedGuild(e.getGuild())) return;
         if (e.getButton() == null || e.getButton().getId() == null) return;
+        if (e.isAcknowledged()) return;
 
         if (heart.genMgr().getDiscordUser(e.getUser().getIdLong()).isBlacklisted()) {
             e.reply("You are blacklisted from using this bot.").setEphemeral(true).queue();
@@ -494,12 +493,14 @@ public class CmdTicket extends DiscordCommand {
 
 
         if ("BUTTON_TICKET_ADMIN_ONLY".equalsIgnoreCase(e.getButton().getId())) {
-
-            if (true) {
-                e.reply("You don't have permission to use admin only.").setEphemeral(true).queue();
+            Ticket ticket = storage.getTicketByID(e.getChannel().getId());
+            if (ticket == null) return;
+            if (!cnf.isAllowTicketOwnerToAdminOnly() && ticket.getTicketOwnerID() != e.getUser().getIdLong()) {
+                if (heart.dscCmdMgr().hasPermission(e, "ticket_admin_only")) {
+                    e.reply("You don't have permission to use admin only.").setEphemeral(true).queue();
+                }
             }
 
-            Ticket ticket = storage.getTicketByID(e.getChannel().getId());
             if (ticket.isAdminOnlyMode()) {
                 ticket.setAdminOnlyMode(false);
                 setTicketNormalaMode(ticket);
@@ -510,14 +511,14 @@ public class CmdTicket extends DiscordCommand {
                 setTicketAdminOnly(ticket);
                 e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is now in admin only mode.").build())).queue();
             }
-            heart.cnfMgr().save(storage);
+            ConfigUtil.save(storage);
             return;
         }
         if ("BUTTON_TICKET_CLOSE".equalsIgnoreCase(e.getButton().getId())) {
             Ticket ticket = storage.getTicketByID(e.getChannel().getId());
             if (ticket == null) return;
             if (!cnf.isAllowTicketOwnerToCloseOwnTicket() && ticket.getTicketOwnerID() != e.getUser().getIdLong()) {
-                if (true) {
+                if (heart.dscCmdMgr().hasPermission(e, "ticket_close")) {
                     e.reply("You don't have permission to close tickets.").setEphemeral(true).queue();
                 }
             }
@@ -529,6 +530,11 @@ public class CmdTicket extends DiscordCommand {
         if (!e.getButton().getId().startsWith("TICKET_OPTION_")) return;
         String ticketID = e.getButton().getId().replace("TICKET_OPTION_", "");
         TicketOption ticketOption = getTicketOptionById(ticketID);
+        DiscordUser discordUser = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
+        if (ticketOption.isRequireLink() && !discordUser.isLinked()) {
+            e.reply("You need to link your account in game in order to open this ticket type.").setEphemeral(true).queue();
+            return;
+        }
         if (isMaxTicketsOpen(e.getUser())) {
             e.reply("You have reached the maximum amount of tickets open. Please close one before creating a new one.").setEphemeral(true).queue();
             return;
@@ -545,13 +551,13 @@ public class CmdTicket extends DiscordCommand {
         File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + e.getChannel().getId() + ".log");
         StringBuilder toFile = new StringBuilder();
         for (Message.Attachment attachment : e.getMessage().getAttachments()) {
-            toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+            toFile.append(Utility.formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
                     .append("[FILE]" + attachment.getUrl())
                     .append("\n");
         }
         if (e.getMessage().getEmbeds().size() != 0) {
             MessageEmbed embed = e.getMessage().getEmbeds().get(0);
-            toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+            toFile.append(Utility.formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
                     .append("[EMBED]" + "\n   Title: ")
                     .append(embed.getTitle()).append("\n   Desc: ")
                     .append(embed.getDescription()).append("\n");
@@ -560,7 +566,7 @@ public class CmdTicket extends DiscordCommand {
             }
         } else {
             if (!e.getMessage().getContentDisplay().equals("")) {
-                toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ").append(e.getMessage().getContentDisplay());
+                toFile.append(Utility.formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ").append(e.getMessage().getContentDisplay());
             }
         }
         heart.getTask(TaskRunTicketLogQueue.class).getToLog().add(new LogObject(toFile.toString(), ticketLogsFile));
@@ -573,7 +579,7 @@ public class CmdTicket extends DiscordCommand {
         File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + e.getChannel().getId() + ".log");
         StringBuilder toFile = new StringBuilder();
 
-        toFile.append(heart.genMgr().formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
+        toFile.append(Utility.formatDate(System.currentTimeMillis())).append(" [").append(e.getAuthor().getAsTag()).append("]: ")
                 .append("[MESSAGE EDIT]" + e.getMessage().getContentDisplay())
                 .append("\n");
 

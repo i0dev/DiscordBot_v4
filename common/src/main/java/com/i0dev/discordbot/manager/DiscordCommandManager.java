@@ -86,10 +86,12 @@ public class DiscordCommandManager extends AbstractManager {
     }
 
     public boolean hasPermission(SlashCommandEvent e, DiscordCommand cmd) {
-        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.gCnf().isAdministratorBypassPermissions())
+        String cmdID = e.getCommandPath().replace("/", "_").toLowerCase();
+
+        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.cnf().isAdministratorBypassPermissions())
             return true;
         AtomicBoolean allowed = new AtomicBoolean(false);
-        PermissionNode node = heart.getConfig(PermissionConfig.class).getPermissions().stream().filter(permissionNode -> permissionNode.getCommandID().equalsIgnoreCase(cmd.getCommand())).findFirst().orElse(null);
+        PermissionNode node = heart.getConfig(PermissionConfig.class).getPermissions().stream().filter(permissionNode -> permissionNode.getCommandID().equalsIgnoreCase(cmdID)).findFirst().orElse(null);
 
         heart.logDebug(node + "");
         heart.logDebug(e.getCommandPath().replace("/", "_").toLowerCase());
@@ -99,7 +101,7 @@ public class DiscordCommandManager extends AbstractManager {
                 e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .colorHexCode(heart.failureColor())
                         .content("This command has no permissions set in config so it is default to admin only!\n" +
-                                "Reference commandID: `" + e.getCommandPath().replace("/", "_").toLowerCase() + "`")
+                                "Reference commandID: `" + cmdID + "`")
                         .build())).queue();
             return e.getMember().hasPermission(Permission.ADMINISTRATOR);
         }
@@ -107,14 +109,17 @@ public class DiscordCommandManager extends AbstractManager {
         List<Long> usersRoleIds = e.getMember().getRoles().stream().map(Role::getIdLong).collect(Collectors.toList());
         if (node.getUsersAllowed().contains(e.getUser().getIdLong())) allowed.set(true);
         if (anyMatch(node.getRolesAllowed(), usersRoleIds)) allowed.set(true);
+        if (node.isEveryoneAllowed()) allowed.set(true);
+        if (node.isRequireAdministrator() && !e.getMember().hasPermission(Permission.ADMINISTRATOR)) allowed.set(false);
         if (anyMatch(node.getRolesDenied(), usersRoleIds)) allowed.set(false);
         if (node.getUsersDenied().contains(e.getUser().getIdLong())) allowed.set(false);
 
         return allowed.get();
     }
 
-    public boolean hasPermission(ButtonClickEvent e, String cmdID) {
-        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.gCnf().isAdministratorBypassPermissions())
+    public boolean hasPermission(ButtonClickEvent e, String commandID) {
+        String cmdID = commandID.replace("/", "_").toLowerCase();
+        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.cnf().isAdministratorBypassPermissions())
             return true;
         AtomicBoolean allowed = new AtomicBoolean(false);
         PermissionNode node = heart.getConfig(PermissionConfig.class).getPermissions().stream().filter(permissionNode -> permissionNode.getCommandID().equalsIgnoreCase(cmdID)).findFirst().orElse(null);
@@ -124,7 +129,7 @@ public class DiscordCommandManager extends AbstractManager {
                 e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .colorHexCode(heart.failureColor())
                         .content("This command has no permissions set in config so it is default to admin only!\n" +
-                                "Reference commandID: `" + cmdID .replace("/", "_").toLowerCase() + "`")
+                                "Reference commandID: `" + cmdID + "`")
                         .build())).queue();
             return e.getMember().hasPermission(Permission.ADMINISTRATOR);
         }
@@ -132,6 +137,8 @@ public class DiscordCommandManager extends AbstractManager {
         List<Long> usersRoleIds = e.getMember().getRoles().stream().map(Role::getIdLong).collect(Collectors.toList());
         if (node.getUsersAllowed().contains(e.getUser().getIdLong())) allowed.set(true);
         if (anyMatch(node.getRolesAllowed(), usersRoleIds)) allowed.set(true);
+        if (node.isEveryoneAllowed()) allowed.set(true);
+        if (node.isRequireAdministrator() && !e.getMember().hasPermission(Permission.ADMINISTRATOR)) allowed.set(false);
         if (anyMatch(node.getRolesDenied(), usersRoleIds)) allowed.set(false);
         if (node.getUsersDenied().contains(e.getUser().getIdLong())) allowed.set(false);
 

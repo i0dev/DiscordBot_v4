@@ -5,6 +5,14 @@ plugins {
 dependencies {
     implementation project(':common')
     compileOnly 'net.md-5:bungeecord-api:1.16-R0.3'
+    implementation 'org.xerial:sqlite-jdbc:3.30.1'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    testCompileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation("net.dv8tion:JDA:5.0.0-alpha.4")
+
+
 }
 
 repositories {
@@ -12,13 +20,5 @@ repositories {
 }
 
 shadowJar {
-    archiveFileName = 'DiscordBot-bungee.jar'
-
-    dependencies {
-        include(dependency('com.i0dev.discordbot:.*'))
-    }
-}
-
-artifacts {
-    archives shadowJar
+    baseName 'DiscordBot-Bungee'
 }

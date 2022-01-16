@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.config.PermissionNode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -12,10 +13,13 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+
 public class PermissionConfig extends AbstractConfiguration {
     public PermissionConfig(Heart heart, String path) {
         this.path = path;
-        this.heart = heart;    }
+        this.heart = heart;
+    }
 
     List<PermissionNode> permissions = Arrays.asList(
             new PermissionNode(
@@ -23,7 +27,9 @@ public class PermissionConfig extends AbstractConfiguration {
                     new ArrayList<>(),
                     new ArrayList<>(),
                     new ArrayList<>(),
-                    new ArrayList<>()
+                    new ArrayList<>(),
+                    true,
+                    false
             )
     );
 

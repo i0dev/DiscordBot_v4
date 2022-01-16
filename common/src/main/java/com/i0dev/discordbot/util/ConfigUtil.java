@@ -25,11 +25,15 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 
 public class ConfigUtil {
-    public ConfigUtil() {
-    }
 
     public static String ObjectToJson(AbstractConfiguration object) {
         return (new GsonBuilder()).setPrettyPrinting().serializeNulls().disableHtmlEscaping().create().toJson((new JsonParser()).parse((new Gson()).fromJson((new Gson()).toJson(object), JsonObject.class).toString()));
+    }
+
+    public static String ObjectToJson(Object object, boolean pretty) {
+        if (pretty)
+            return new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create().toJson(new JsonParser().parse(new Gson().fromJson(new Gson().toJson(object), JsonObject.class).toString()));
+        return new GsonBuilder().serializeNulls().disableHtmlEscaping().create().toJson(new JsonParser().parse(new Gson().fromJson(new Gson().toJson(object), JsonObject.class).toString()));
     }
 
     public static JsonObject ObjectToJsonObj(Object object) {

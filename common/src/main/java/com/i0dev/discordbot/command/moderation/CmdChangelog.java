@@ -26,7 +26,7 @@ public class CmdChangelog extends DiscordCommand {
     public void execute(SlashCommandEvent e, CommandEventData data) {
         String message = e.getOption("message").getAsString();
         TextChannel channel;
-        channel = e.getOption("channel") == null ? heart.getJda().getTextChannelById(heart.gCnf().getChangelogChannel()) : (TextChannel) e.getOption("channel").getAsGuildChannel();
+        channel = e.getOption("channel") == null ? heart.getJda().getTextChannelById(heart.cnf().getChangelogChannel()) : (TextChannel) e.getOption("channel").getAsGuildChannel();
 
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .user(e.getUser())

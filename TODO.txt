@@ -1,32 +1,73 @@
-Absence check for configuration.
-
-Help pages
-
-Giveaways modules
-
 Member counter channel misc config
 
-New verifification system
+New verification system
 
-Continiuous roles
+ingame linking - alomst done
 
-assure muted
-
-unmute & unban after expire
-
-ingame linking
+verify panel pin broken
 
 movement
 
 gamemode
 
+help is broken
+
 auto mod
 
-welcome messages
+Clean up has permission
 
 2fa
 
-leave join logs
-
 logs for moderation cmds
 
+remove permission debug msgs
+
+java.lang.IllegalArgumentException: URL must be a valid http(s) or attachment url.
+        at net.dv8tion.jda.internal.utils.Checks.check(Checks.java:48) ~[?:?]
+        at net.dv8tion.jda.api.EmbedBuilder.urlCheck(EmbedBuilder.java:813) ~[?:?]
+        at net.dv8tion.jda.api.EmbedBuilder.setImage(EmbedBuilder.java:518) ~[?:?]
+        at com.i0dev.discordbot.manager.MessageManager.createMessageEmbed(MessageManager.java:39) ~[?:?]
+        at com.i0dev.discordbot.manager.GeneralManager.onGuildMemberJoin(GeneralManager.java:74) ~[?:?]
+        at net.dv8tion.jda.api.hooks.ListenerAdapter.onEvent(ListenerAdapter.java:358) ~[?:?]
+        at net.dv8tion.jda.api.hooks.InterfacedEventManager.handle(InterfacedEventManager.java:96) ~[?:?]
+        at net.dv8tion.jda.internal.hooks.EventManagerProxy.handleInternally(EventManagerProxy.java:88) ~[?:?]
+        at net.dv8tion.jda.internal.hooks.EventManagerProxy.handle(EventManagerProxy.java:70) ~[?:?]
+        at net.dv8tion.jda.internal.JDAImpl.handleEvent(JDAImpl.java:163) ~[?:?]
+        at net.dv8tion.jda.internal.handle.GuildMemberAddHandler.handleInternally(GuildMemberAddHandler.java:52) ~[?:?]
+        at net.dv8tion.jda.internal.handle.SocketHandler.handle(SocketHandler.java:36) ~[?:?]
+        at net.dv8tion.jda.internal.requests.WebSocketClient.onDispatch(WebSocketClient.java:953) ~[?:?]
+        at net.dv8tion.jda.internal.requests.WebSocketClient.onEvent(WebSocketClient.java:840) ~[?:?]
+        at net.dv8tion.jda.internal.requests.WebSocketClient.handleEvent(WebSocketClient.java:818) ~[?:?]
+        at net.dv8tion.jda.internal.requests.WebSocketClient.onBinaryMessage(WebSocketClient.java:992) ~[?:?]
+        at com.neovisionaries.ws.client.ListenerManager.callOnBinaryMessage(ListenerManager.java:385) ~[?:?]
+        at com.neovisionaries.ws.client.ReadingThread.callOnBinaryMessage(ReadingThread.java:276) ~[?:?]
+        at com.neovisionaries.ws.client.ReadingThread.handleBinaryFrame(ReadingThread.java:996) ~[?:?]
+        at com.neovisionaries.ws.client.ReadingThread.handleFrame(ReadingThread.java:755) ~[?:?]
+        at com.neovisionaries.ws.client.ReadingThread.main(ReadingThread.java:108) ~[?:?]
+        at com.neovisionaries.ws.client.ReadingThread.runMain(ReadingThread.java:64) ~[?:?]
+        at com.neovisionaries.ws.client.WebSocketThread.run(WebSocketThread.java:45) ~[?:?]
+
+
+[14:36:38 ERROR]: Error occurred while enabling DiscordBot v4.0.0 (Is it up to date?)
+java.sql.SQLException: [SQLITE_ERROR] SQL error or missing database (near "DROP": syntax error)
+        at org.sqlite.DB.newSQLException(DB.java:383) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.sqlite.DB.newSQLException(DB.java:387) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.sqlite.DB.throwex(DB.java:374) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.sqlite.NativeDB.prepare(Native Method) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.sqlite.DB.prepare(DB.java:123) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.sqlite.Stmt.execute(Stmt.java:113) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at com.i0dev.discordbot.manager.SQLManager.absenceCheck(SQLManager.java:143) ~[?:?]
+        at com.i0dev.discordbot.manager.SQLManager.makeTable(SQLManager.java:315) ~[?:?]
+        at com.i0dev.discordbot.Heart.startup(Heart.java:123) ~[?:?]
+        at com.i0dev.discordbot.Heart.<init>(Heart.java:78) ~[?:?]
+        at com.i0dev.discordbot.bukkit.BukkitMain.onEnable(BukkitMain.java:18) ~[?:?]
+        at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:292) ~[server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.bukkit.plugin.java.JavaPluginLoader.enablePlugin(JavaPluginLoader.java:340) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:405) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.bukkit.craftbukkit.v1_10_R1.CraftServer.loadPlugin(CraftServer.java:362) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at org.bukkit.craftbukkit.v1_10_R1.CraftServer.enablePlugins(CraftServer.java:322) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at net.minecraft.server.v1_10_R1.MinecraftServer.t(MinecraftServer.java:416) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at net.minecraft.server.v1_10_R1.MinecraftServer.l(MinecraftServer.java:381) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at net.minecraft.server.v1_10_R1.MinecraftServer.a(MinecraftServer.java:336) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at net.minecraft.server.v1_10_R1.DedicatedServer.init(DedicatedServer.java:270) [server.jar:git-Spigot-6016ac7-10c10b3]
+        at net.minecraft.server.v1_10_R1.MinecraftServer.run(Mine

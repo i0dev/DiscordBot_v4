@@ -6,6 +6,7 @@ import com.i0dev.discordbot.object.Requirement;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.util.Utility;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -40,8 +41,7 @@ public class CmdProfile extends DiscordCommand {
         bot.append("Discord Invites: ").append("`{invites}`").append("\n");
         bot.append("Warnings: ").append("`{warnings}`").append("\n");
         bot.append("Blacklisted: ").append("`{blacklisted}`").append("\n");
-        bot.append("Muted: ").append("`{muted}`").append("\n");
-        bot.append("Mute Ending: ").append("{muteExpiry}").append("\n");
+        bot.append("Timed Out: ").append("`{timedOut}`").append("\n");
 
         User invitedBy = null;
         if (discordUser.getInvitedByID() != 0)
@@ -64,7 +64,7 @@ public class CmdProfile extends DiscordCommand {
                 .fields(new MessageEmbed.Field[]{
                         new MessageEmbed.Field("__General Info__", general.toString(), true),
                         new MessageEmbed.Field("__Activity Info__", bot.toString(), true),
-                        new MessageEmbed.Field("__Server Roles__", e.getGuild().getMember(user) == null ? "`Not in discord.`" : heart.genMgr().formatRolesList(member.getRoles()), false)
+                        new MessageEmbed.Field("__Server Roles__", e.getGuild().getMember(user) == null ? "`Not in discord.`" : Utility.formatRolesList(member.getRoles()), false)
                 })
                 .authorName("{tag}'s User Profile")
                 .authorImg(user.getEffectiveAvatarUrl())

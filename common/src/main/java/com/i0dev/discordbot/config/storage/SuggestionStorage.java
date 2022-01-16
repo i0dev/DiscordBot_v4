@@ -4,6 +4,7 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.command.Suggestion;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Getter
 @ToString
 @Setter
+@NoArgsConstructor
 public class SuggestionStorage extends AbstractConfiguration {
 
     public SuggestionStorage(Heart heart, String path) {

@@ -33,11 +33,11 @@ public class CmdVerifyPanel extends DiscordCommand {
         boolean pin = e.getOption("pin") != null && e.getOption("pin").getAsBoolean();
         Message message = e.getTextChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .user(e.getUser())
-                        .title(heart.gCnf().getVerifyPanelTitle())
-                        .content(heart.gCnf().getVerifyPanelDescription())
+                        .title(heart.cnf().getVerifyPanelTitle())
+                        .content(heart.cnf().getVerifyPanelDescription())
                         .colorHexCode(heart.normalColor())
                         .build()))
-                .setActionRow(Button.success("BUTTON_VERIFY_PANEL", heart.gCnf().getVerifyPanelButtonLabel()).withEmoji(Emoji.fromMarkdown(heart.gCnf().getVerifyPanelButtonEmoji())))
+                .setActionRow(Button.success("BUTTON_VERIFY_PANEL", heart.cnf().getVerifyPanelButtonLabel()).withEmoji(Emoji.fromMarkdown(heart.cnf().getVerifyPanelButtonEmoji())))
                 .complete();
         if (pin) message.pin();
         e.reply("Verify panel sent.").setEphemeral(true).queue();
@@ -51,8 +51,14 @@ public class CmdVerifyPanel extends DiscordCommand {
         if (!heart.genMgr().isAllowedGuild(e.getGuild())) return;
         DiscordUser user = heart.genMgr().getDiscordUser(e.getUser());
         if (user.isBlacklisted()) return;
-        heart.gCnf().getVerifyRolesToGive().forEach(user::addRole);
-        heart.gCnf().getVerifyRolesToRemove().forEach(user::removeRole);
+
+        if (heart.cnf().isRequireLinkToVerify() && !user.isLinked()) {
+            e.reply(heart.cnf().getNotLinkedTryVerify()).setEphemeral(true).queue();
+            return;
+        }
+
+        heart.cnf().getVerifyRolesToGive().forEach(user::addRole);
+        heart.cnf().getVerifyRolesToRemove().forEach(user::removeRole);
         e.getInteraction().deferReply(true).setContent("You have successfully verified yourself!").queue();
     }
 }
