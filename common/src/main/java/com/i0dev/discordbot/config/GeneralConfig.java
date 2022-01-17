@@ -84,4 +84,8 @@ public class GeneralConfig extends AbstractConfiguration {
     String linkInfoCheckIgnFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`\nTag: `{tag}`\nID: `{id}`";
     long linkCodeLength = 6L;
 
+    boolean memberCounterEnabled = true;
+    long memberCounterChannel = 0L;
+    String memberCounterFormat = "Member Count: `{guildMemberCount}`";
+
 }

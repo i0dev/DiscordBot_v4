@@ -32,5 +32,14 @@ public class CmdPrune extends DiscordCommand {
                 .content("You pruned {amt} messages in this channel".replace("{amt}", amount + ""))
                 .colorHexCode(heart.successColor())
                 .build())).setEphemeral(true).queue();
+
+        heart.logDiscord(EmbedMaker.builder()
+                .user(e.getUser())
+                .author(e.getUser())
+                .authorImg(e.getUser().getEffectiveAvatarUrl())
+                .authorName("Moderation Log")
+                .content("{tag} pruned {amt} messages in {channel}".replace("{channel}", e.getChannel().getAsMention()).replace("{amt}", amount + ""))
+                .build()
+        );
     }
 }

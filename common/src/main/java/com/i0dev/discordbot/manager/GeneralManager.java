@@ -68,7 +68,7 @@ public class GeneralManager extends AbstractManager {
 
         if (heart.cnf().isWelcomePingUser()) channel.sendMessage(e.getMember().getAsMention()).queue();
 
-        String image = heart.cnf().getWelcomeEmbedImageUrl() == null ? null : heart.cnf().getWelcomeEmbedImageUrl();
+        String image = heart.cnf().getWelcomeEmbedImageUrl().equals("") ? null : heart.cnf().getWelcomeEmbedImageUrl();
         String thumbnail = heart.cnf().isWelcomeUserMemberAvatarAsThumbnail() ? e.getUser().getEffectiveAvatarUrl() : heart.getJda().getSelfUser().getEffectiveAvatarUrl();
 
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()

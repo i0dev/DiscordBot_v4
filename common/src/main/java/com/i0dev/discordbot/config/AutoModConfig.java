@@ -21,9 +21,20 @@ public class AutoModConfig extends AbstractConfiguration {
         this.heart = heart;
     }
 
+    boolean logEverything = true;
+    long autoModLogChannelId = 0;
+
     boolean adminsBypassAutoMod = true;
 
     List<Long> channelsToDeleteSentMessageIn = new ArrayList<>();
+
+    List<String> deleteMessageIfContains = Arrays.asList(
+            "nicecar",
+            "discord.gg"
+    );
+
+    List<Long> autoModEffectedChannels = new ArrayList<>();
+    boolean effectedChannelsWhitelistMode = false;
 
 
 }

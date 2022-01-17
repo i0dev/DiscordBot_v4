@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CmdHelp extends DiscordCommand {
 
@@ -24,36 +25,41 @@ public class CmdHelp extends DiscordCommand {
     @Override
     protected void setupCommand() {
         setCommand("help");
-
-        List<Command.Choice> choices = new ArrayList<>();
-        for (int i = 0; i < pages; i++) {
-            choices.add(new Command.Choice("" + i + 1, i + 1));
-        }
-        addOption(new OptionData(OptionType.INTEGER, "page", "page number", true)
-                .addChoices(choices)
-        );
+        addOption(new OptionData(OptionType.INTEGER, "page", "page number", true));
         setDescription("Gets the help page.");
     }
 
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
         long page = e.getOption("page").getAsLong();
-        StringBuilder commands = new StringBuilder();
-        StringBuilder multiCommands = new StringBuilder();
-        for (DiscordCommand command : getHeart().getCommands()) {
-                commands.append("`/").append(command.getCommand()).append("` - *").append(command.getDescription()).append("*\n");
-        }
+        List<DiscordCommand> basicCommands = heart.getCommands().stream().filter(cmd -> cmd.getSubCommands().isEmpty()).collect(Collectors.toList());
+        List<DiscordCommand> multiCommands = heart.getCommands().stream().filter(cmd -> !cmd.getSubCommands().isEmpty()).collect(Collectors.toList());
 
+        List<String> helpRows = new ArrayList<>();
+        basicCommands.forEach(command1 -> helpRows.add("`/" + command1.getCommand() + "` - " + command1.getDescription()));
+        multiCommands.forEach(cmd -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("**/").append(cmd.getCommand()).append("**\n");
+            cmd.getSubCommands().forEach(subCmd -> {
+                sb.append("** • **`").append(subCmd.getName()).append("` - ").append(subCmd.getDescription()).append("\n");
+            });
+            helpRows.add(sb.toString());
+        });
+
+        long maxPages = (long) Math.ceil(helpRows.size() / (double) pages);
+        long rowsPerPAge = 10;
+        int startingRow = page == 1 ? 0 : (int) (page * rowsPerPAge);
+        List<String> currentRows = helpRows.subList(startingRow, (int) Math.min(startingRow + rowsPerPAge, helpRows.size()));
+
+        StringBuilder sb = new StringBuilder();
+        currentRows.forEach(sb::append);
 
         data.reply(EmbedMaker.builder()
-                .authorName("DiscordBot Help Page " + page)
-                .fields(new MessageEmbed.Field[]{
-                                new MessageEmbed.Field("__**Commands**__", commands.toString(), true),
-                                new MessageEmbed.Field("__**Multi Commands**__", multiCommands.toString(), true)
-                        }
-                )
-                .authorImg(heart.getGlobalImageUrl())
+                .authorName("DiscordBot Help - Page " + page + "/" + maxPages)
+                .user(e.getUser())
+                .authorImg(heart.getJda().getSelfUser().getEffectiveAvatarUrl())
+                .content(sb.toString())
                 .build());
-    }
 
+    }
 }

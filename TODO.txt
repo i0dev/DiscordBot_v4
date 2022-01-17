@@ -1,10 +1,4 @@
-Member counter channel misc config
-
 New verification system
-
-ingame linking - alomst done
-
-verify panel pin broken
 
 movement
 
@@ -12,40 +6,15 @@ gamemode
 
 help is broken
 
-auto mod
-
-Clean up has permission
+Clean up has permission - remove permission debug msgs
 
 2fa
 
-logs for moderation cmds
+tebex module
 
-remove permission debug msgs
+cmdInfo command
 
-java.lang.IllegalArgumentException: URL must be a valid http(s) or attachment url.
-        at net.dv8tion.jda.internal.utils.Checks.check(Checks.java:48) ~[?:?]
-        at net.dv8tion.jda.api.EmbedBuilder.urlCheck(EmbedBuilder.java:813) ~[?:?]
-        at net.dv8tion.jda.api.EmbedBuilder.setImage(EmbedBuilder.java:518) ~[?:?]
-        at com.i0dev.discordbot.manager.MessageManager.createMessageEmbed(MessageManager.java:39) ~[?:?]
-        at com.i0dev.discordbot.manager.GeneralManager.onGuildMemberJoin(GeneralManager.java:74) ~[?:?]
-        at net.dv8tion.jda.api.hooks.ListenerAdapter.onEvent(ListenerAdapter.java:358) ~[?:?]
-        at net.dv8tion.jda.api.hooks.InterfacedEventManager.handle(InterfacedEventManager.java:96) ~[?:?]
-        at net.dv8tion.jda.internal.hooks.EventManagerProxy.handleInternally(EventManagerProxy.java:88) ~[?:?]
-        at net.dv8tion.jda.internal.hooks.EventManagerProxy.handle(EventManagerProxy.java:70) ~[?:?]
-        at net.dv8tion.jda.internal.JDAImpl.handleEvent(JDAImpl.java:163) ~[?:?]
-        at net.dv8tion.jda.internal.handle.GuildMemberAddHandler.handleInternally(GuildMemberAddHandler.java:52) ~[?:?]
-        at net.dv8tion.jda.internal.handle.SocketHandler.handle(SocketHandler.java:36) ~[?:?]
-        at net.dv8tion.jda.internal.requests.WebSocketClient.onDispatch(WebSocketClient.java:953) ~[?:?]
-        at net.dv8tion.jda.internal.requests.WebSocketClient.onEvent(WebSocketClient.java:840) ~[?:?]
-        at net.dv8tion.jda.internal.requests.WebSocketClient.handleEvent(WebSocketClient.java:818) ~[?:?]
-        at net.dv8tion.jda.internal.requests.WebSocketClient.onBinaryMessage(WebSocketClient.java:992) ~[?:?]
-        at com.neovisionaries.ws.client.ListenerManager.callOnBinaryMessage(ListenerManager.java:385) ~[?:?]
-        at com.neovisionaries.ws.client.ReadingThread.callOnBinaryMessage(ReadingThread.java:276) ~[?:?]
-        at com.neovisionaries.ws.client.ReadingThread.handleBinaryFrame(ReadingThread.java:996) ~[?:?]
-        at com.neovisionaries.ws.client.ReadingThread.handleFrame(ReadingThread.java:755) ~[?:?]
-        at com.neovisionaries.ws.client.ReadingThread.main(ReadingThread.java:108) ~[?:?]
-        at com.neovisionaries.ws.client.ReadingThread.runMain(ReadingThread.java:64) ~[?:?]
-        at com.neovisionaries.ws.client.WebSocketThread.run(WebSocketThread.java:45) ~[?:?]
+echo module
 
 
 [14:36:38 ERROR]: Error occurred while enabling DiscordBot v4.0.0 (Is it up to date?)

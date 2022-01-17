@@ -33,5 +33,14 @@ public class CmdKick extends DiscordCommand {
                 .content("You have successfully kicked {tag} from the server.")
                 .colorHexCode(heart.successColor())
                 .build());
+
+        heart.logDiscord(EmbedMaker.builder()
+                .user(user)
+                .author(e.getUser())
+                .authorImg(e.getUser().getEffectiveAvatarUrl())
+                .authorName("Moderation Log")
+                .content("{authorTag} has kicked {tag} from the server.")
+                .build()
+        );
     }
 }

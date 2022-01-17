@@ -39,7 +39,7 @@ public class CmdVerifyPanel extends DiscordCommand {
                         .build()))
                 .setActionRow(Button.success("BUTTON_VERIFY_PANEL", heart.cnf().getVerifyPanelButtonLabel()).withEmoji(Emoji.fromMarkdown(heart.cnf().getVerifyPanelButtonEmoji())))
                 .complete();
-        if (pin) message.pin();
+        if (pin) message.pin().queue();
         e.reply("Verify panel sent.").setEphemeral(true).queue();
     }
 
@@ -60,5 +60,10 @@ public class CmdVerifyPanel extends DiscordCommand {
         heart.cnf().getVerifyRolesToGive().forEach(user::addRole);
         heart.cnf().getVerifyRolesToRemove().forEach(user::removeRole);
         e.getInteraction().deferReply(true).setContent("You have successfully verified yourself!").queue();
+        heart.logDiscord(EmbedMaker.builder()
+                .user(e.getUser())
+                .colorHexCode(heart.successColor())
+                .content("{tag} has verified themselves!")
+                .build());
     }
 }

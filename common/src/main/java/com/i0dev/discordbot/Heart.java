@@ -120,7 +120,8 @@ public class Heart {
                 new TaskUpdateDiscordActivity(this),
                 new TaskRunTicketLogQueue(this),
                 new TaskExecuteGiveaways(this),
-                new TaskAutoGiveRoles(this)
+                new TaskAutoGiveRoles(this),
+                new TaskUpdateMemberCounter(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));

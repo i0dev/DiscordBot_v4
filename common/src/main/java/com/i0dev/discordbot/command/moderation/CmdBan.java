@@ -35,5 +35,14 @@ public class CmdBan extends DiscordCommand {
                 .content("You have successfully banned {tag} from the server.")
                 .colorHexCode(heart.successColor())
                 .build());
+
+        heart.logDiscord(EmbedMaker.builder()
+                .user(user)
+                .author(e.getUser())
+                .authorImg(e.getUser().getEffectiveAvatarUrl())
+                .authorName("Moderation Log")
+                .content("{authorTag} has banned {tag} from the server.")
+                .build()
+        );
     }
 }
