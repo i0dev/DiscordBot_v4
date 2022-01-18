@@ -1,22 +1,49 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) i0dev
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.i0dev.discordbot.manager;
 
 import com.i0dev.discordbot.Heart;
+import com.i0dev.discordbot.config.configs.PermissionConfig;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import com.i0dev.discordbot.object.config.PermissionGroup;
+import com.i0dev.discordbot.object.config.PermissionNode;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class GeneralManager extends AbstractManager {
@@ -51,6 +78,16 @@ public class GeneralManager extends AbstractManager {
         return heart.getAllowedGuilds().contains(guild);
     }
 
+    public void verifyMember(Member member) {
+        DiscordUser user = getDiscordUser(member.getUser());
+        heart.cnf().getVerifyRolesToGive().forEach(user::addRole);
+        heart.cnf().getVerifyRolesToRemove().forEach(user::removeRole);
+        heart.logDiscord(EmbedMaker.builder()
+                .user(member.getUser())
+                .colorHexCode(heart.successColor())
+                .content("{tag} has verified themselves!")
+                .build());
+    }
 
     /*
     Welcome message handler
@@ -75,6 +112,7 @@ public class GeneralManager extends AbstractManager {
                 .title(heart.cnf().getWelcomeEmbedTitle())
                 .author(e.getUser())
                 .user(e.getUser())
+                .guild(e.getGuild())
                 .thumbnail(thumbnail)
                 .image(image)
                 .content(heart.cnf().getWelcomeEmbedContent())
@@ -87,6 +125,8 @@ public class GeneralManager extends AbstractManager {
             if (heart.cnf().isJoinLogsEnabled()) {
                 TextChannel joinLogsChannel = heart.getJda().getTextChannelById(heart.cnf().getJoinLeaveLogsChannel());
                 if (joinLogsChannel == null) return;
+                DiscordUser discordUser = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
+                System.out.println("Inviter ID: " + discordUser.getInvitedByID());
                 joinLogsChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .authorImg(e.getUser().getEffectiveAvatarUrl())
                         .user(e.getUser())
@@ -116,4 +156,78 @@ public class GeneralManager extends AbstractManager {
                     .build())).queue();
         }
     }
+
+    /*
+    Permissions
+     */
+
+    public boolean hasPermission(Member member, String cmdID, GenericInteractionCreateEvent e) {
+        if (member == null) return false;
+        if (heart.cnf().isAdministratorBypassPermissions() && member.hasPermission(Permission.ADMINISTRATOR))
+            return true;
+        List<PermissionGroup> groups = heart.getConfig(PermissionConfig.class).getPermissionGroups();
+        List<PermissionNode> nodes = heart.getConfig(PermissionConfig.class).getPermissions();
+        PermissionNode node = nodes.stream().filter(permissionNode -> permissionNode.getCommandID().equalsIgnoreCase(cmdID)).findFirst().orElse(null);
+
+        // If the cmd id doesn't have a permission node set in config
+        if (node == null) {
+            MessageEmbed msg = heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                    .colorHexCode(heart.failureColor())
+                    .content("This command has no permissions set in config so it is default to admin only!\n" +
+                            "Reference commandID: `" + cmdID + "`")
+                    .build());
+
+            e.replyEmbeds(msg).queue();
+            return member.hasPermission(Permission.ADMINISTRATOR);
+        }
+
+        // Check node permissions
+        if (node.getUsersDenied().contains(member.getUser().getIdLong())) return false;
+        if (node.getRolesDenied().stream().anyMatch(deniedRoleId -> member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList()).contains(deniedRoleId)))
+            return false;
+
+        if (node.getUsersAllowed().contains(member.getUser().getIdLong())) return true;
+        if (node.getRolesAllowed().stream().anyMatch(allowedRoleId -> member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList()).contains(allowedRoleId)))
+            return true;
+
+        // Check group permissions
+        Set<PermissionGroup> memberGroups = groups.stream().filter(permissionGroup -> permissionGroup.getUsers().contains(member.getUser().getIdLong())).collect(Collectors.toSet());
+        memberGroups.addAll(getAllOfMembersGroups(member, memberGroups));
+
+        System.out.println("All of " + member.getUser().getAsTag() + "'s groups: \n" + memberGroups);
+
+        for (PermissionGroup memberGroup : memberGroups) {
+            if (!node.getGroups().stream().map(String::toLowerCase).collect(Collectors.toList()).contains(memberGroup.getName().toLowerCase()))
+                continue;
+
+            if (memberGroup.getUsers().contains(member.getUser().getIdLong())) return true;
+            if (memberGroup.getRoles().stream().anyMatch(allowedRoleId -> member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList()).contains(allowedRoleId)))
+                return true;
+        }
+
+        return false;
+    }
+
+    public Set<PermissionGroup> getAllOfMembersGroups(Member member, Set<PermissionGroup> alreadyAdded) {
+        List<Role> roles = member.getRoles();
+        Set<PermissionGroup> configGroups = new HashSet<>(heart.getConfig(PermissionConfig.class).getPermissionGroups());
+        Set<PermissionGroup> groups = new HashSet<>();
+        groups.addAll(configGroups.stream().filter(pg -> pg.getUsers().contains(member.getUser().getIdLong())).collect(Collectors.toSet()));
+        groups.addAll(configGroups.stream().filter(pg -> pg.getRoles().stream().map(aLong -> heart.getJda().getRoleById(aLong)).collect(Collectors.toList()).stream().anyMatch(roles::contains)).collect(Collectors.toList()));
+        List<PermissionGroup> toAdd = new ArrayList<>();
+        groups.forEach(pg -> toAdd.addAll(getGroupsInheritedGroups(pg, alreadyAdded)));
+        groups.addAll(toAdd);
+        return groups;
+    }
+
+    public Set<PermissionGroup> getGroupsInheritedGroups(PermissionGroup group, Set<PermissionGroup> alreadyAdded) {
+        alreadyAdded.add(group);
+        for (String inheritGroup : group.getInheritGroups()) {
+            PermissionGroup inheritGroupObject = heart.getConfig(PermissionConfig.class).getPermissionGroups().stream().filter(pg -> pg.getName().equalsIgnoreCase(inheritGroup)).findFirst().orElse(null);
+            if (inheritGroupObject == null) continue;
+            getGroupsInheritedGroups(inheritGroupObject, alreadyAdded);
+        }
+        return alreadyAdded;
+    }
+
 }

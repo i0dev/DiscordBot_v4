@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) i0dev
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.i0dev.discordbot.command.general;
 
 import com.i0dev.discordbot.Heart;
@@ -36,7 +61,7 @@ public class CmdHelp extends DiscordCommand {
         List<DiscordCommand> multiCommands = heart.getCommands().stream().filter(cmd -> !cmd.getSubCommands().isEmpty()).collect(Collectors.toList());
 
         List<String> helpRows = new ArrayList<>();
-        basicCommands.forEach(command1 -> helpRows.add("`/" + command1.getCommand() + "` - " + command1.getDescription()));
+        basicCommands.forEach(command1 -> helpRows.add("`/" + command1.getCommand() + "` - " + command1.getDescription() + "\n"));
         multiCommands.forEach(cmd -> {
             StringBuilder sb = new StringBuilder();
             sb.append("**/").append(cmd.getCommand()).append("**\n");
@@ -46,10 +71,15 @@ public class CmdHelp extends DiscordCommand {
             helpRows.add(sb.toString());
         });
 
-        long maxPages = (long) Math.ceil(helpRows.size() / (double) pages);
-        long rowsPerPAge = 10;
-        int startingRow = page == 1 ? 0 : (int) (page * rowsPerPAge);
-        List<String> currentRows = helpRows.subList(startingRow, (int) Math.min(startingRow + rowsPerPAge, helpRows.size()));
+        long maxPages = ((long) Math.ceil(helpRows.size() / (double) heart.cnf().getHelpRowsPerPage()) - 1);
+
+        if (page > maxPages) {
+            data.replyFailure("Page number is too high. Max page is " + maxPages);
+            return;
+        }
+
+        int startingRow = page == 1 ? 0 : (int) (page * heart.cnf().getHelpRowsPerPage());
+        List<String> currentRows = helpRows.subList(startingRow, (int) Math.min(startingRow + heart.cnf().getHelpRowsPerPage(), helpRows.size()));
 
         StringBuilder sb = new StringBuilder();
         currentRows.forEach(sb::append);

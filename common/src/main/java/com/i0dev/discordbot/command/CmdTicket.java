@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) i0dev
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.i0dev.discordbot.command;
 
 import com.i0dev.discordbot.Heart;
@@ -78,10 +103,13 @@ public class CmdTicket extends DiscordCommand {
                 .addOptions(new OptionData(OptionType.BOOLEAN, "pin", "Weather to pin the ticket panel or not.", true))
                 .addOptions(new OptionData(OptionType.STRING, "image", "If you want to have an image that's embedded into the panel", false))
         );
+        addSubcommand(new SubcommandData("rename", "Sends the ticket panel.")
+                .addOptions(new OptionData(OptionType.STRING, "name", "Rename the ticket to a new name!", false))
+        );
         addSubcommand(new SubcommandData("remove", "Removes a user from a ticket.")
                 .addOptions(new OptionData(OptionType.USER, "user", "The user to remove from the ticket.", true)));
-        addSubcommand(new SubcommandData("rename", "Renames the current ticket.")
-                .addOptions(new OptionData(OptionType.STRING, "name", "The new name you wish to rename the ticket", true)));
+        addSubcommand(new SubcommandData("manual", "Turns the current channel into a ticket."));
+
     }
 
     @Override
@@ -94,6 +122,7 @@ public class CmdTicket extends DiscordCommand {
         if ("panel".equals(e.getSubcommandName())) panel(e, data);
         if ("remove".equals(e.getSubcommandName())) remove(e, data);
         if ("rename".equals(e.getSubcommandName())) rename(e, data);
+        if ("manual".equals(e.getSubcommandName())) manual(e, data);
     }
 
     public void add(SlashCommandEvent e, CommandEventData data) {
@@ -133,7 +162,7 @@ public class CmdTicket extends DiscordCommand {
     public void close(SlashCommandEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
-        String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("close").getAsString();
+        String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("reason").getAsString();
         closeTicket(ticket, reason, e.getUser());
         e.deferReply().queue();
     }
@@ -198,7 +227,24 @@ public class CmdTicket extends DiscordCommand {
         List<Button> buttons = new ArrayList<>();
         if (cnf.isTicketCreateButtonMode()) {
             for (TicketOption ticketOption : cnf.getTicketOptions()) {
-                Button button = Button.primary("TICKET_OPTION_" + ticketOption.getTicketID(), Emoji.fromUnicode(ticketOption.getEmoji())).withLabel(ticketOption.getButtonLabel());
+                Button button;
+                String id = "TICKET_OPTION_" + ticketOption.getTicketID();
+                Emoji emoji = Emoji.fromUnicode(ticketOption.getEmoji());
+                String label = ticketOption.getButtonLabel();
+                switch (ticketOption.getTicketColor().toUpperCase()) {
+                    case "GREEN":
+                        button = Button.success(id, emoji).withLabel(label);
+                        break;
+                    case "RED":
+                        button = Button.danger(id, emoji).withLabel(label);
+                        break;
+                    case "BLUE":
+                        button = Button.primary(id, emoji).withLabel(label);
+                        break;
+                    default:
+                        button = Button.secondary(id, emoji).withLabel(label);
+                }
+
                 buttons.add(button);
             }
         }
@@ -248,6 +294,20 @@ public class CmdTicket extends DiscordCommand {
         ticket.setTicketName(newTicketName);
         ConfigUtil.save(storage);
         data.replySuccess("Renamed the ticket to: " + newTicketName);
+    }
+
+    public void manual(SlashCommandEvent e, CommandEventData data) {
+        if (heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) != null) {
+            data.replyFailure("This channel is already a ticket.");
+            return;
+        }
+
+        Ticket ticket = new Ticket(e.getChannel().getIdLong(), e.getChannel().getName(), e.getUser().getIdLong(), storage.getTicketNumber(), false, cnf.getTicketOptions().get(0).getTicketID());
+        storage.getTickets().add(ticket);
+        ConfigUtil.save(storage);
+        storage.setTicketNumber(storage.getTicketNumber() + 1);
+        ConfigUtil.save(storage);
+        data.replySuccess("This channel is now a ticket.");
     }
 
     // Utility methods

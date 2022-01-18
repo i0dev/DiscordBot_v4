@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) i0dev
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.i0dev.discordbot.config;
 
 import com.i0dev.discordbot.Heart;
@@ -5,10 +30,7 @@ import com.i0dev.discordbot.object.abs.AbstractConfiguration;
 import com.i0dev.discordbot.object.config.DatabaseInformation;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @ToString
@@ -42,6 +64,9 @@ public class GeneralConfig extends AbstractConfiguration {
     long suggestionAcceptedChannel = 0L;
     long suggestionDeniedChannel = 0L;
     long joinLeaveLogsChannel = 0L;
+    long factionsConfirmedChannel = 0L;
+    long welcomeMessageChannel = 0L;
+    long memberCounterChannel = 0L;
 
     // Random
 
@@ -68,7 +93,6 @@ public class GeneralConfig extends AbstractConfiguration {
 
     boolean welcomeMessagesEnabled = true;
     boolean welcomePingUser = true;
-    long welcomeMessageChannel = 0L;
     boolean welcomeUserMemberAvatarAsThumbnail = true;
     String welcomeEmbedImageUrl = "";
     String welcomeEmbedTitle = "Welcome {tag} to {guildName}!";
@@ -83,9 +107,18 @@ public class GeneralConfig extends AbstractConfiguration {
     String linkInfoFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`";
     String linkInfoCheckIgnFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`\nTag: `{tag}`\nID: `{id}`";
     long linkCodeLength = 6L;
+    boolean verifyUserOnLink = true;
+
+    boolean forceNicknameForLinkedUsers = true;
+    Map<Long, String> roleToPrefixMap = Collections.singletonMap(766183472749871114L, "[Manager] ");
+    String forceNicknameFormat = "{prefix}{ign}";
+
 
     boolean memberCounterEnabled = true;
-    long memberCounterChannel = 0L;
     String memberCounterFormat = "Member Count: `{guildMemberCount}`";
 
+    long helpRowsPerPage = 10L;
+
+    long factionsLeaderRole = 0L;
+    String factionsConfirmFormat = "Faction: `{faction}`\nLeader: `{tag}`\nMembers: `{size}`";
 }

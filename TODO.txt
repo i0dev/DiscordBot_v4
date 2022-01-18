@@ -2,12 +2,6 @@ New verification system
 
 movement
 
-gamemode
-
-help is broken
-
-Clean up has permission - remove permission debug msgs
-
 2fa
 
 tebex module
@@ -16,27 +10,15 @@ cmdInfo command
 
 echo module
 
+automod log offence
 
-[14:36:38 ERROR]: Error occurred while enabling DiscordBot v4.0.0 (Is it up to date?)
+suggestion gamemode colors
+
+reaction roles
+
+polls
+
+In game link make so click to copy code
+
 java.sql.SQLException: [SQLITE_ERROR] SQL error or missing database (near "DROP": syntax error)
-        at org.sqlite.DB.newSQLException(DB.java:383) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.sqlite.DB.newSQLException(DB.java:387) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.sqlite.DB.throwex(DB.java:374) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.sqlite.NativeDB.prepare(Native Method) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.sqlite.DB.prepare(DB.java:123) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.sqlite.Stmt.execute(Stmt.java:113) ~[server.jar:git-Spigot-6016ac7-10c10b3]
         at com.i0dev.discordbot.manager.SQLManager.absenceCheck(SQLManager.java:143) ~[?:?]
-        at com.i0dev.discordbot.manager.SQLManager.makeTable(SQLManager.java:315) ~[?:?]
-        at com.i0dev.discordbot.Heart.startup(Heart.java:123) ~[?:?]
-        at com.i0dev.discordbot.Heart.<init>(Heart.java:78) ~[?:?]
-        at com.i0dev.discordbot.bukkit.BukkitMain.onEnable(BukkitMain.java:18) ~[?:?]
-        at org.bukkit.plugin.java.JavaPlugin.setEnabled(JavaPlugin.java:292) ~[server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.bukkit.plugin.java.JavaPluginLoader.enablePlugin(JavaPluginLoader.java:340) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.bukkit.plugin.SimplePluginManager.enablePlugin(SimplePluginManager.java:405) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.bukkit.craftbukkit.v1_10_R1.CraftServer.loadPlugin(CraftServer.java:362) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at org.bukkit.craftbukkit.v1_10_R1.CraftServer.enablePlugins(CraftServer.java:322) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at net.minecraft.server.v1_10_R1.MinecraftServer.t(MinecraftServer.java:416) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at net.minecraft.server.v1_10_R1.MinecraftServer.l(MinecraftServer.java:381) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at net.minecraft.server.v1_10_R1.MinecraftServer.a(MinecraftServer.java:336) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at net.minecraft.server.v1_10_R1.DedicatedServer.init(DedicatedServer.java:270) [server.jar:git-Spigot-6016ac7-10c10b3]
-        at net.minecraft.server.v1_10_R1.MinecraftServer.run(Mine

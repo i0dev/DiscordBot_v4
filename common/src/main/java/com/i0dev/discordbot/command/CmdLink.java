@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) i0dev
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.i0dev.discordbot.command;
 
 import com.i0dev.discordbot.Heart;
@@ -66,12 +91,19 @@ public class CmdLink extends DiscordCommand {
     public void code(SlashCommandEvent e, CommandEventData data) {
         String code = e.getOption("code").getAsString();
 
-        LinkManager lm = getHeart().getManager(LinkManager.class);
-        if (!lm.isOnLinkList(code)) {
-            data.replyFailure("The code **" + code + "** can not be found. Please check your code and try again.");
+        if (data.getDiscordUser().isLinked()){
+            data.replyFailure("You are already linked to the ign {ign}!".replace("{ign}", data.getDiscordUser().getMinecraftIGN()));
             return;
         }
+
+        LinkManager lm = getHeart().getManager(LinkManager.class);
         UUID uuid = lm.getUUIDFromCode(code);
+
+        if (!lm.isOnLinkList(code) || uuid == null) {
+            e.reply("The code ``" + code + "`` can not be found. Please check your code and try again.").setEphemeral(true);
+            return;
+        }
+
 
         DiscordUser discordUser = getHeart().genMgr().getDiscordUser(e.getUser());
 
@@ -84,6 +116,10 @@ public class CmdLink extends DiscordCommand {
 
         e.reply("You have linked your account to **" + discordUser.getMinecraftIGN() + "**").setEphemeral(true).queue();
         lm.removeFromLinkList(code);
+
+        if (heart.cnf().isVerifyUserOnLink()) {
+            heart.genMgr().verifyMember(e.getMember());
+        }
 
         heart.logDiscord(EmbedMaker.builder()
                 .user(e.getUser())
