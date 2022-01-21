@@ -1,7 +1,3 @@
-New verification system
-
-movement
-
 2fa
 
 tebex module
@@ -10,15 +6,17 @@ cmdInfo command
 
 echo module
 
-automod log offence
-
 suggestion gamemode colors
 
 reaction roles
 
-polls
+null check on api req for mojang
 
-In game link make so click to copy code
+poll module
+
+add new ticket permissions
+
+In game link make so click to copy code -- it broken
 
 java.sql.SQLException: [SQLITE_ERROR] SQL error or missing database (near "DROP": syntax error)
         at com.i0dev.discordbot.manager.SQLManager.absenceCheck(SQLManager.java:143) ~[?:?]

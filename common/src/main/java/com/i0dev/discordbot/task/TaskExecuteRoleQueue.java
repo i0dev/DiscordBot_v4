@@ -77,11 +77,11 @@ public class TaskExecuteRoleQueue extends AbstractTask {
         if (queueObject.isAdd()) {
             if (member.getRoles().contains(role)) execute();
             guild.addRoleToMember(user.getId(), role).queue();
-            heart.logDebug("Applied the role " + ConsoleColors.PURPLE + role.getName() + ConsoleColors.WHITE + " to the user: " + ConsoleColors.PURPLE + member.getEffectiveName());
+            heart.logDebug("Applied the role " + ConsoleColors.PURPLE + role.getName() + ConsoleColors.RESET + " to the user: " + ConsoleColors.PURPLE + member.getEffectiveName());
         } else {
             if (!member.getRoles().contains(role)) execute();
             guild.removeRoleFromMember(user.getId(), role).queue();
-            heart.logDebug("Removed the role " + ConsoleColors.PURPLE + role.getName() + ConsoleColors.WHITE + " from the user: " + ConsoleColors.PURPLE + member.getEffectiveName());
+            heart.logDebug("Removed the role " + ConsoleColors.PURPLE + role.getName() + ConsoleColors.RESET + " from the user: " + ConsoleColors.PURPLE + member.getEffectiveName());
         }
     }
 }

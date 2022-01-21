@@ -28,9 +28,13 @@ package com.i0dev.discordbot.task;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.AbstractTask;
+import lombok.SneakyThrows;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 
+import java.sql.ResultSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,25 +52,40 @@ public class TaskUpdateUsersNickname extends AbstractTask {
         setTimeUnit(TimeUnit.MINUTES);
     }
 
+    @SneakyThrows
     @Override
     public void execute() {
-        if (heart.cnf().isForceNicknameForLinkedUsers()) return;
-        heart.getJda().getGuilds().forEach(guild -> guild.getMembers().forEach(member -> {
-            if (member.getUser().isBot()) return;
-            DiscordUser discordUser = heart.genMgr().getDiscordUser(member.getUser());
-
-            String ign = discordUser.getMinecraftIGN();
-            String prefix = getPrefix(member);
-
-            String newNickname = heart.cnf().getForceNicknameFormat()
-                    .replace("{prefix}", prefix)
-                    .replace("{ign}", ign)
-                    .replace("{name}", member.getUser().getName());
-
-            if (member.getEffectiveName().equals(newNickname)) return;
-            discordUser.modifyNickname(newNickname, guild);
-        }));
+        if (!heart.cnf().isForceNicknameForLinkedUsers()) return;
+        ResultSet resultSet = heart.sqlMgr().runQueryWithResult("SELECT * FROM DiscordUser WHERE linked = 1");
+        while (resultSet.next()) {
+            User user = heart.getJda().getUserById(resultSet.getString("id"));
+            if (user == null) continue;
+            updateUserInAllGuilds(user);
+        }
     }
+
+
+    public void updateMember(Member member) {
+        if (member == null) return;
+        if (member.getUser().isBot()) return;
+        DiscordUser discordUser = heart.genMgr().getDiscordUser(member.getUser());
+
+        String ign = discordUser.getMinecraftIGN().equals("") ? member.getUser().getName() : discordUser.getMinecraftIGN();
+        String prefix = getPrefix(member);
+
+        String newNickname = heart.cnf().getForceNicknameFormat()
+                .replace("{prefix}", prefix)
+                .replace("{ign}", ign)
+                .replace("{name}", member.getUser().getName());
+
+        if (member.getEffectiveName().equals(newNickname)) return;
+        discordUser.modifyNickname(newNickname, member.getGuild());
+    }
+
+    public void updateUserInAllGuilds(User user) {
+        user.getMutualGuilds().forEach(guild -> updateMember(guild.getMember(user)));
+    }
+
 
     private String getPrefix(Member member) {
         AtomicReference<String> ret = new AtomicReference<>("");

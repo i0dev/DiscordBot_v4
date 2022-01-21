@@ -28,6 +28,7 @@ package com.i0dev.discordbot.object;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.task.TaskExecuteNicknameQueue;
 import com.i0dev.discordbot.task.TaskExecuteRoleQueue;
+import com.i0dev.discordbot.task.TaskUpdateUsersNickname;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
@@ -118,7 +119,7 @@ public class DiscordUser {
         if (member == null) return;
         if (member.getEffectiveName().equals(nickname)) return;
 
-        heart.getTask(TaskExecuteNicknameQueue.class).add(new NicknameQueueObject(id, guild.getIdLong(), nickname));
+        heart.getTask(TaskExecuteNicknameQueue.class).add(new NicknameQueueObject(this.id, guild.getIdLong(), nickname));
     }
 
     public void removeRole(long id) {
@@ -131,6 +132,10 @@ public class DiscordUser {
         Member member = guild.getMember(getAsUser());
         if (member == null) return;
         heart.getTask(TaskExecuteRoleQueue.class).add(new RoleQueueObject(id, role.getIdLong(), false));
+    }
+
+    public void refreshNickname() {
+        heart.getTask(TaskUpdateUsersNickname.class).updateUserInAllGuilds(getAsUser());
     }
 
 }

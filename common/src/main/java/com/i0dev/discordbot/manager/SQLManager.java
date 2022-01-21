@@ -32,6 +32,7 @@ import com.i0dev.discordbot.object.config.DatabaseInformation;
 import com.i0dev.discordbot.util.ConsoleColors;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
@@ -41,12 +42,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Getter
 public class SQLManager extends AbstractManager {
     public SQLManager(Heart heart) {
         super(heart);
     }
 
-    Connection connection;
+    public Connection connection = null;
 
     @Override
     public void initialize() {
@@ -72,27 +74,27 @@ public class SQLManager extends AbstractManager {
 
     @SneakyThrows
     public void connect() {
-            Class.forName("org.sqlite.JDBC");
-            DatabaseInformation db = heart.cnf().getDatabase();
-            String database = db.getName();
-            if (db.isEnabled()) {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                HikariConfig config = new HikariConfig();
-                config.setJdbcUrl("jdbc:mysql://" + db.getAddress() + ":" + db.getPort() + "/" + database);
-                config.setUsername(db.getUsername());
-                config.setPassword(db.getPassword());
-                config.addDataSourceProperty("cachePrepStmts", "true");
-                config.addDataSourceProperty("prepStmtCacheSize", "250");
-                config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-                HikariDataSource ds = new HikariDataSource(config);
-                connection = ds.getConnection();
-                heart.logSpecial("Connected to Hikari MySQL database: " + ConsoleColors.PURPLE_BOLD + database);
-            } else {
-                database = heart.getDataFolder() + "/DiscordBot.db";
-                String url = "jdbc:sqlite:" + database;
-                connection = DriverManager.getConnection(url);
-                heart.logSpecial("Connected to SQLite database: " + ConsoleColors.PURPLE_BOLD + "DiscordBot.db");
-            }
+        Class.forName("org.sqlite.JDBC");
+        DatabaseInformation db = heart.cnf().getDatabase();
+        String database = db.getName();
+        if (db.isEnabled()) {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl("jdbc:mysql://" + db.getAddress() + ":" + db.getPort() + "/" + database);
+            config.setUsername(db.getUsername());
+            config.setPassword(db.getPassword());
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            HikariDataSource ds = new HikariDataSource(config);
+            connection = ds.getConnection();
+            heart.logSpecial("Connected to Hikari MySQL database: " + ConsoleColors.PURPLE_BOLD + database);
+        } else {
+            database = heart.getDataFolder() + "/DiscordBot.db";
+            String url = "jdbc:sqlite:" + database;
+            connection = DriverManager.getConnection(url);
+            heart.logSpecial("Connected to SQLite database: " + ConsoleColors.PURPLE_BOLD + "DiscordBot.db");
+        }
     }
 
     @SneakyThrows

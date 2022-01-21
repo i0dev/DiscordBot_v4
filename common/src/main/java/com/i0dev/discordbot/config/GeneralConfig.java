@@ -43,7 +43,7 @@ public class GeneralConfig extends AbstractConfiguration {
         this.heart = heart;
     }
 
-    String botToken = "NzQ4NzQ1NTA4ODMwNDQ1NTk4.X0h5mA.z2cVqID14C9wQvrO1gcQx7yRRYw";
+    String botToken = "Your Token Here";
     String activity = "i0dev Bot v4";
     String activityType = "watching";
     String activityStreamingUrl = "https://www.twitch.tv/i0dev";
@@ -108,6 +108,7 @@ public class GeneralConfig extends AbstractConfiguration {
     String linkInfoCheckIgnFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`\nTag: `{tag}`\nID: `{id}`";
     long linkCodeLength = 6L;
     boolean verifyUserOnLink = true;
+    boolean requireLinkToJoinGiveaways = true;
 
     boolean forceNicknameForLinkedUsers = true;
     Map<Long, String> roleToPrefixMap = Collections.singletonMap(766183472749871114L, "[Manager] ");

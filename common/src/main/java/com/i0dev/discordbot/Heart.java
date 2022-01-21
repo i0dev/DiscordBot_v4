@@ -64,6 +64,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -153,7 +154,8 @@ public class Heart {
                 new TaskExecuteGiveaways(this),
                 new TaskAutoGiveRoles(this),
                 new TaskUpdateMemberCounter(this),
-                new TaskUpdateUsersNickname(this)
+                new TaskUpdateUsersNickname(this),
+                new TaskVerifyAuthentication(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
@@ -162,6 +164,21 @@ public class Heart {
         sqlMgr().makeTable(DiscordUser.class);
         sqlMgr().absenceCheck(DiscordUser.class);
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Loaded!" + ConsoleColors.RESET);
+        if (!isVerifiedBot()) {
+            shutdownBotNotVerified();
+            return;
+        }
+        logSpecial("Successfully verified bot with authentication servers.");
+    }
+
+    public void shutdownBotNotVerified() {
+        logger.log(Level.SEVERE, ConsoleColors.RED + "DiscordBot failed to authenticate with i0dev api. Shutting down..." + ConsoleColors.RESET);
+        shutdown();
+    }
+
+    public boolean isVerifiedBot() {
+        JSONObject access = apiMgr().getAuthentication(jda.getSelfUser().getId());
+        return (boolean) access.get("access");
     }
 
 
@@ -193,7 +210,8 @@ public class Heart {
                 new CmdLink(this),
                 new CmdGiveaway(this),
                 new CmdFactions(this),
-                new CmdCommandInfo(this)
+                new CmdCommandInfo(this),
+                new CmdMovement(this)
         ));
         commands.forEach(command -> {
             command.initialize();
@@ -237,6 +255,7 @@ public class Heart {
         }
     }
 
+    @SneakyThrows
     public void shutdown() {
         configs.forEach(AbstractConfiguration::deinitialize);
         managers.forEach(AbstractManager::deinitialize);
@@ -248,6 +267,7 @@ public class Heart {
         tasks.clear();
         jda.shutdown();
         executorService.shutdown();
+        if (sqlMgr() != null && sqlMgr().getConnection() != null) sqlMgr().getConnection().close();
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Shutdown." + ConsoleColors.RESET);
     }
 

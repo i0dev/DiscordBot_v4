@@ -61,28 +61,29 @@ public class DiscordCommandManager extends AbstractManager {
                 if (!command.getCommand().equalsIgnoreCase(e.getName())) continue;
                 if (!hasPermission(e, command)) {
                     if (!e.isAcknowledged())
-                        data.replyFailure("You don't have permission to use this command!");
+                        e.reply("You don't have permission to use this command!").setEphemeral(true).queue();
+
                     return;
                 }
                 if (isBlacklisted(data.getDiscordUser())) {
-                    data.replyFailure("You are blacklisted from using this bot!");
+                    e.reply("You are blacklisted from using this bot!").setEphemeral(true).queue();
                     return;
                 }
                 if (!isValidGuild(e.getGuild())) {
-                    data.replyFailure("This bot is not allowed to be used in this server.");
+                    e.reply("This bot is not allowed to be used in this server.").setEphemeral(true).queue();
                     return;
                 }
                 // Requirements
                 if (null == e.getGuild() && command.getRequirements().contains(Requirement.IN_GUILD)) {
-                    data.replyFailure("This command can only be used in a server.");
+                    e.reply("This command can only be used in a server.").setEphemeral(true).queue();
                     return;
                 }
                 if (!user.isLinked() && command.getRequirements().contains(Requirement.LINKED)) {
-                    data.replyFailure("You need to link your account in-game before you can use this command.");
+                    e.reply("You need to link your account in-game before you can use this command.").setEphemeral(true).queue();
                     return;
                 }
                 if (command.getRequirements().contains(Requirement.IS_TICKET) && heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) == null) {
-                    data.replyFailure("This command can only be used in a ticket channel.");
+                    e.reply("This command can only be used in a ticket channel.").setEphemeral(true).queue();
                     return;
                 }
                 // End Requirements
@@ -98,7 +99,7 @@ public class DiscordCommandManager extends AbstractManager {
                 return;
             }
         }
-        data.replyFailure("This command does not exist!");
+        e.reply("This command does not exist!").setEphemeral(true).queue();
     }
 
 

@@ -121,6 +121,7 @@ public class CmdMovement extends DiscordCommand {
                 .authorName(cnf.getPromoteTitle())
                 .user(member.getUser())
                 .author(e.getUser())
+                .colorHexCode(heart.successColor())
                 .authorImg(member.getUser().getEffectiveAvatarUrl())
                 .content(cnf.getPromoteContent()
                         .replace("{role}", role.getAsMention())
@@ -128,6 +129,9 @@ public class CmdMovement extends DiscordCommand {
                 )
                 .build())).queue();
 
+        discordUser.refreshNickname();
+
+        data.replySuccess("Promoted " + member.getUser().getAsTag() + " to " + role.getAsMention());
     }
 
     public void demote(SlashCommandEvent e, CommandEventData data) {
@@ -156,13 +160,18 @@ public class CmdMovement extends DiscordCommand {
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(cnf.getDemoteTitle())
                 .user(member.getUser())
-                .author(e.getUser())
+                .author(e.getUser()).colorHexCode(heart.successColor())
+
                 .authorImg(member.getUser().getEffectiveAvatarUrl())
                 .content(cnf.getDemoteContent()
                         .replace("{role}", role.getAsMention())
                         .replace("{displayName}", newObject == null ? role.getAsMention() : newObject.getDisplayName())
                 )
                 .build())).queue();
+
+        discordUser.refreshNickname();
+
+        data.replySuccess("Demoted " + member.getUser().getAsTag() + " to " + role.getAsMention());
     }
 
     public void remove(SlashCommandEvent e, CommandEventData data) {
@@ -186,10 +195,14 @@ public class CmdMovement extends DiscordCommand {
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(cnf.getRemoveTitle())
                 .user(member.getUser())
-                .author(e.getUser())
+                .author(e.getUser()).colorHexCode(heart.failureColor())
+
                 .authorImg(member.getUser().getEffectiveAvatarUrl())
                 .content(cnf.getRemoveContent())
                 .build())).queue();
+
+        discordUser.refreshNickname();
+        data.replySuccess("Removed " + member.getUser().getAsTag() + " from the staff team.");
 
     }
 
@@ -210,9 +223,15 @@ public class CmdMovement extends DiscordCommand {
                 .authorName(cnf.getResignTitle())
                 .user(member.getUser())
                 .author(e.getUser())
+                .colorHexCode(heart.failureColor())
                 .authorImg(member.getUser().getEffectiveAvatarUrl())
                 .content(cnf.getResignContent())
                 .build())).queue();
+
+        discordUser.refreshNickname();
+
+
+        data.replySuccess("You resigned " + member.getUser().getAsTag() + " from the staff team.");
 
     }
 

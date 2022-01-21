@@ -48,6 +48,6 @@ public class TaskUpdateMemberCounter extends AbstractTask {
         if (!heart.cnf().isMemberCounterEnabled()) return;
         GuildChannel channel = heart.getJda().getGuildChannelById(heart.cnf().getMemberCounterChannel());
         if (channel == null) return;
-        channel.getManager().setName(heart.msgMgr().replacePlaceholders(heart.cnf().getMemberCounterFormat())).queue();
+        channel.getManager().setName(heart.msgMgr().replacePlaceholders(heart.cnf().getMemberCounterFormat(), null, null, channel.getGuild())).queue();
     }
 }

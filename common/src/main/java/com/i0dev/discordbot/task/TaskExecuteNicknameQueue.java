@@ -30,6 +30,7 @@ import com.i0dev.discordbot.object.NicknameQueueObject;
 import com.i0dev.discordbot.object.RoleQueueObject;
 import com.i0dev.discordbot.object.abs.AbstractTask;
 import com.i0dev.discordbot.util.ConsoleColors;
+import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -48,7 +49,7 @@ public class TaskExecuteNicknameQueue extends AbstractTask {
     public void initialize() {
         nicknameQueueList = new ArrayList<>();
         setInterval(2);
-        setInitialDelay(5);
+        setInitialDelay(10);
         setTimeUnit(TimeUnit.SECONDS);
     }
 
@@ -64,6 +65,7 @@ public class TaskExecuteNicknameQueue extends AbstractTask {
         nicknameQueueList.add(object);
     }
 
+    @SneakyThrows
     @Override
     public void execute() {
         if (nicknameQueueList.isEmpty()) return;
@@ -77,7 +79,12 @@ public class TaskExecuteNicknameQueue extends AbstractTask {
 
         if (member.getEffectiveName().equals(queueObject.getNickname())) return;
 
-        member.modifyNickname(queueObject.getNickname()).queue();
-        heart.logDebug("Changed nickname of " + ConsoleColors.PURPLE + member.getUser().getAsTag() + ConsoleColors.WHITE + " to " + ConsoleColors.PURPLE + queueObject.getNickname() + ConsoleColors.WHITE + " in " + ConsoleColors.PURPLE + guild.getName() + ConsoleColors.WHITE + ".");
+        member.modifyNickname(queueObject.getNickname()).submit().thenAccept(a -> {
+            if (!member.getEffectiveName().equalsIgnoreCase(queueObject.getNickname()))
+                add(queueObject);
+            else
+                heart.logDebug("Changed nickname of " + ConsoleColors.PURPLE + member.getUser().getAsTag() + ConsoleColors.WHITE + " to " + ConsoleColors.PURPLE + queueObject.getNickname() + ConsoleColors.WHITE + " in " + ConsoleColors.PURPLE + guild.getName() + ConsoleColors.WHITE + ".");
+        });
+
     }
 }

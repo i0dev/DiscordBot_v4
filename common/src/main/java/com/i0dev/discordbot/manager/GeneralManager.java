@@ -125,13 +125,11 @@ public class GeneralManager extends AbstractManager {
             if (heart.cnf().isJoinLogsEnabled()) {
                 TextChannel joinLogsChannel = heart.getJda().getTextChannelById(heart.cnf().getJoinLeaveLogsChannel());
                 if (joinLogsChannel == null) return;
-                DiscordUser discordUser = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
-                System.out.println("Inviter ID: " + discordUser.getInvitedByID());
                 joinLogsChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .authorImg(e.getUser().getEffectiveAvatarUrl())
                         .user(e.getUser())
                         .colorHexCode(heart.successColor())
-                        .title("Member Join Log")
+                        .authorName("Member Join Log")
                         .content(heart.cnf().getJoinLogsFormat())
                         .build())).queue();
             }
@@ -150,7 +148,7 @@ public class GeneralManager extends AbstractManager {
             leaveLogsChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                     .authorImg(e.getUser().getEffectiveAvatarUrl())
                     .user(e.getUser())
-                    .title("Member Leave Log")
+                    .authorName("Member Leave Log")
                     .colorHexCode(heart.failureColor())
                     .content(heart.cnf().getLeaveLogsFormat())
                     .build())).queue();
@@ -193,19 +191,28 @@ public class GeneralManager extends AbstractManager {
         // Check group permissions
         Set<PermissionGroup> memberGroups = groups.stream().filter(permissionGroup -> permissionGroup.getUsers().contains(member.getUser().getIdLong())).collect(Collectors.toSet());
         memberGroups.addAll(getAllOfMembersGroups(member, memberGroups));
+        memberGroups.addAll(groups.stream().filter(PermissionGroup::isEveryoneHasPermission).collect(Collectors.toList()));
 
-        System.out.println("All of " + member.getUser().getAsTag() + "'s groups: \n" + memberGroups);
+        System.out.println("All of " + member.getUser().getAsTag() + "'s groups: " + memberGroups);
 
+        Set<Long> allowedRoles = new HashSet<>();
+        Set<Long> allowedUsers = new HashSet<>();
+
+        memberGroups.forEach(g -> allowedRoles.addAll(g.getRoles()));
+        memberGroups.forEach(g -> allowedUsers.addAll(g.getUsers()));
+
+        AtomicBoolean hasPermission = new AtomicBoolean(false);
         for (PermissionGroup memberGroup : memberGroups) {
             if (!node.getGroups().stream().map(String::toLowerCase).collect(Collectors.toList()).contains(memberGroup.getName().toLowerCase()))
                 continue;
 
-            if (memberGroup.getUsers().contains(member.getUser().getIdLong())) return true;
-            if (memberGroup.getRoles().stream().anyMatch(allowedRoleId -> member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList()).contains(allowedRoleId)))
-                return true;
+            if (memberGroup.isEveryoneHasPermission()) hasPermission.set(true);
+            if (allowedUsers.contains(member.getUser().getIdLong())) hasPermission.set(true);
+            if (allowedRoles.stream().anyMatch(allowedRoleId -> member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList()).contains(allowedRoleId)))
+                hasPermission.set(true);
         }
 
-        return false;
+        return hasPermission.get();
     }
 
     public Set<PermissionGroup> getAllOfMembersGroups(Member member, Set<PermissionGroup> alreadyAdded) {

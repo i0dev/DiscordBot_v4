@@ -100,7 +100,7 @@ public class CmdLink extends DiscordCommand {
         UUID uuid = lm.getUUIDFromCode(code);
 
         if (!lm.isOnLinkList(code) || uuid == null) {
-            e.reply("The code ``" + code + "`` can not be found. Please check your code and try again.").setEphemeral(true);
+            e.reply("The code ``" + code + "`` can not be found. Please check your code and try again.").setEphemeral(true).queue();
             return;
         }
 
@@ -121,6 +121,8 @@ public class CmdLink extends DiscordCommand {
             heart.genMgr().verifyMember(e.getMember());
         }
 
+        discordUser.refreshNickname();
+
         heart.logDiscord(EmbedMaker.builder()
                 .user(e.getUser())
                 .colorHexCode(heart.normalColor())
@@ -136,17 +138,18 @@ public class CmdLink extends DiscordCommand {
 
         discordUser.setLinked(true);
         discordUser.setMinecraftIGN(ign);
-//        if (heart.getTags().contains(StartupTag.BUKKIT))
-//            discordUser.setMinecraftUUID(org.bukkit.Bukkit.getOfflinePlayer(ign).getUniqueId().toString());
-//        else
-        discordUser.setMinecraftUUID(heart.apiMgr().getUUIDFromIGN(ign).toString());
-
         discordUser.setMinecraftUUID(heart.apiMgr().getUUIDFromIGN(ign).toString());
         discordUser.setLinkCode("FORCED");
         discordUser.setLinkedTime(System.currentTimeMillis());
         discordUser.save();
 
+        if (heart.cnf().isVerifyUserOnLink()) {
+            heart.genMgr().verifyMember(e.getGuild().getMember(user));
+        }
+
         data.replySuccess("Successfully linked **" + user.getAsTag() + "** to `" + ign + "`");
+
+        discordUser.refreshNickname();
 
         heart.logDiscord(EmbedMaker.builder()
                 .user(user)

@@ -28,8 +28,10 @@ package com.i0dev.discordbot.manager;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.config.AutoModConfig;
 import com.i0dev.discordbot.object.abs.AbstractManager;
+import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,16 +42,40 @@ public class AutoModManager extends AbstractManager {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent e) {
-        if (e.getMember() != null && e.getMember().getPermissions().contains(Permission.ADMINISTRATOR) && heart.getConfig(AutoModConfig.class).isAdminsBypassAutoMod())
+        AutoModConfig cnf = heart.getConfig(AutoModConfig.class);
+        if (e.getMember() != null && e.getMember().getPermissions().contains(Permission.ADMINISTRATOR) && cnf.isAdminsBypassAutoMod())
             return;
-        if (heart.getConfig(AutoModConfig.class).getChannelsToDeleteSentMessageIn().contains(e.getChannel().getIdLong())) {
+        if (cnf.getChannelsToDeleteSentMessageIn().contains(e.getChannel().getIdLong())) {
             e.getMessage().delete().queue();
             return;
         }
-        if (!(e.getChannel() instanceof GuildChannel))return;
+        if (!(e.getChannel() instanceof GuildChannel)) return;
         if (isInChannelWhereShouldEffect((GuildChannel) e.getChannel())) {
 
+            boolean hasBad = false;
+            for (String s : e.getMessage().getContentRaw().split(" ")) {
+                if (hasBad) break;
+                for (String deleteMessageIfContain : cnf.getDeleteMessageIfContains())
+                    if (s.equalsIgnoreCase(deleteMessageIfContain)) {
+                        hasBad = true;
+                        break;
+                    }
+            }
 
+            if (hasBad) {
+                e.getMessage().delete().queue();
+                if (cnf.isLogEverything()) {
+                    TextChannel logChannel = e.getGuild().getTextChannelById(cnf.getAutoModLogChannelId());
+                    if (logChannel != null) {
+                        logChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                                .authorName("AutoMod Log")
+                                .user(e.getAuthor())
+                                .authorImg(e.getAuthor().getEffectiveAvatarUrl())
+                                .content("{tag} said a blacklisted word in their message: \n||{message}||".replace("{message}", e.getMessage().getContentRaw()))
+                                .build())).queue();
+                    }
+                }
+            }
         }
     }
 

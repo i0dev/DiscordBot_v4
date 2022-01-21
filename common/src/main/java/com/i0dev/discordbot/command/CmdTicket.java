@@ -335,7 +335,7 @@ public class CmdTicket extends DiscordCommand {
             Role role = channel.getGuild().getRoleById(roleID);
             if (role == null) continue;
             channel.putPermissionOverride(role)
-                    .setAllow(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
+                    .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
                             Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
                             Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
                     .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
@@ -368,7 +368,7 @@ public class CmdTicket extends DiscordCommand {
             Role role = channel.getGuild().getRoleById(roleID);
             if (role == null) continue;
             channel.putPermissionOverride(role)
-                    .setAllow(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
+                    .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
                             Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
                             Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
                     .queue();
@@ -393,7 +393,7 @@ public class CmdTicket extends DiscordCommand {
         ConfigUtil.save(storage);
 
         channel.putPermissionOverride(member)
-                .setAllow(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
+                .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
                         Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
                         Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE, Permission.USE_APPLICATION_COMMANDS)
                 .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,

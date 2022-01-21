@@ -32,6 +32,9 @@ import com.i0dev.discordbot.manager.LinkManager;
 import com.i0dev.discordbot.object.DiscordUser;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -94,7 +97,12 @@ public class CmdLink extends AbstractCommand {
             MsgUtil.msg(sender, "&cYou have generated a link code!");
             MsgUtil.msg(sender, "&cYour link code is: &7" + code);
             MsgUtil.msg(sender, "&cType the command &7/link code " + code + " &cin discord.");
+            BaseComponent msg = new TextComponent(MsgUtil.color("&7&oClick to copy!\n"));
+            msg.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "/link code code:" + code));
+            sender.sendMessage(msg);
+            return;
         }
+        MsgUtil.msg(sender, "&7Usage: &c/link generate");
 
     }
 

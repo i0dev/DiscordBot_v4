@@ -32,6 +32,7 @@ package com.i0dev.discordbot.command;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.config.storage.GiveawayStorage;
+import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
@@ -44,9 +45,11 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.jetbrains.annotations.NotNull;
 
 public class CmdGiveaway extends DiscordCommand {
     public CmdGiveaway(Heart heart) {
@@ -55,6 +58,7 @@ public class CmdGiveaway extends DiscordCommand {
 
     protected void setupCommand() {
         this.setCommand("giveaway");
+        this.setRegisterListener(true);
         this.setDescription("The giveaway module.");
         this.addSubcommand((new SubcommandData("create", "Creates a giveaway."))
                 .addOptions(new OptionData(OptionType.CHANNEL, "channel", "The channel to post the giveaway in.", true),
@@ -74,8 +78,6 @@ public class CmdGiveaway extends DiscordCommand {
         if ("end".equals(e.getSubcommandName())) end(e, data);
         if ("info".equals(e.getSubcommandName())) info(e, data);
         if ("reroll".equals(e.getSubcommandName())) reroll(e, data);
-
-
     }
 
     public void create(SlashCommandEvent e, CommandEventData data) {
@@ -128,7 +130,27 @@ public class CmdGiveaway extends DiscordCommand {
         }
     }
 
+    /*
+    Utilities
+     */
+
     public Giveaway getGiveaway(long messageId) {
         return heart.getConfig(GiveawayStorage.class).getGiveaways().stream().filter((giveaway) -> giveaway.getMessageID() == messageId).findFirst().orElse(null);
+    }
+
+    @Override
+    public void onMessageReactionAdd(MessageReactionAddEvent e) {
+        if (!heart.cnf().isRequireLinkToJoinGiveaways()) return;
+        if (e.getUser().isBot()) return;
+        Giveaway giveaway = this.getGiveaway(e.getMessageIdLong());
+        if (giveaway == null) return;
+
+        DiscordUser user = heart.genMgr().getDiscordUser(e.getUserIdLong());
+
+        if (!user.isLinked()) {
+            e.getReaction().removeReaction(e.getUser()).queue();
+            e.getUser().openPrivateChannel().complete().sendMessage("You must link your account to enter giveaways!").queue();
+        }
+
     }
 }

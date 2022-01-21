@@ -173,5 +173,4 @@ public class MessageManager extends AbstractManager {
         return replacePlaceholders(message, user, author, null);
     }
 
-
 }
