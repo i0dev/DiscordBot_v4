@@ -164,6 +164,8 @@ public class CmdTicket extends DiscordCommand {
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("reason").getAsString();
         closeTicket(ticket, reason, e.getUser());
+        if (e.isAcknowledged()) return;
+        if (e.getInteraction() == null) return;
         e.deferReply().queue();
     }
 
@@ -289,11 +291,11 @@ public class CmdTicket extends DiscordCommand {
     public void rename(SlashCommandEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
-        String newTicketName = e.getOption("name").getAsString().replace(" ", "-") + ticket.getTicketNumber();
+        String newTicketName = e.getOption("name").getAsString().replace(" ", "-") + "-" + ticket.getTicketNumber();
         ((TextChannel) e.getChannel()).getManager().setName(newTicketName).queue();
         ticket.setTicketName(newTicketName);
         ConfigUtil.save(storage);
-        data.replySuccess("Renamed the ticket to: " + newTicketName);
+        data.replySuccess("Renamed the ticket to: " + newTicketName.toLowerCase());
     }
 
     public void manual(SlashCommandEvent e, CommandEventData data) {
@@ -565,7 +567,6 @@ public class CmdTicket extends DiscordCommand {
                 ticket.setAdminOnlyMode(false);
                 setTicketNormalaMode(ticket);
                 e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is no longer admin only.").build())).queue();
-                return;
             } else {
                 ticket.setAdminOnlyMode(true);
                 setTicketAdminOnly(ticket);

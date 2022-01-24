@@ -142,6 +142,13 @@ public class Heart {
         ));
         managers.forEach(AbstractManager::initialize);
         registerConfigs();
+
+        if (cnf().getBotToken().equalsIgnoreCase("Your Token Here")) {
+            logSpecial("No token found in config.json. Please add your token to the file and restart the bot.");
+            shutdown();
+            return;
+        }
+
         sqlMgr().connect();
         createJDA();
         managers.forEach(jda::addEventListener);
@@ -265,8 +272,8 @@ public class Heart {
         managers.clear();
         configs.clear();
         tasks.clear();
-        jda.shutdown();
-        executorService.shutdown();
+        if (jda != null) jda.shutdown();
+        if (executorService != null) executorService.shutdown();
         if (sqlMgr() != null && sqlMgr().getConnection() != null) sqlMgr().getConnection().close();
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Shutdown." + ConsoleColors.RESET);
     }

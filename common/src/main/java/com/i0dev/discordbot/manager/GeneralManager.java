@@ -37,9 +37,12 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -237,4 +240,21 @@ public class GeneralManager extends AbstractManager {
         return alreadyAdded;
     }
 
+    /*
+    For updating users names
+     */
+
+    @Override
+    public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent e) {
+        DiscordUser user = heart.genMgr().getDiscordUser(e.getUser());
+        if (user == null) return;
+        user.refreshNickname();
+    }
+
+    @Override
+    public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent e) {
+        DiscordUser user = heart.genMgr().getDiscordUser(e.getUser());
+        if (user == null) return;
+        user.refreshNickname();
+    }
 }

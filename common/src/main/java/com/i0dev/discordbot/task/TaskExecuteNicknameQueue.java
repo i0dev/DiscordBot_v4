@@ -48,7 +48,7 @@ public class TaskExecuteNicknameQueue extends AbstractTask {
     @Override
     public void initialize() {
         nicknameQueueList = new ArrayList<>();
-        setInterval(2);
+        setInterval(10);
         setInitialDelay(10);
         setTimeUnit(TimeUnit.SECONDS);
     }
@@ -79,12 +79,8 @@ public class TaskExecuteNicknameQueue extends AbstractTask {
 
         if (member.getEffectiveName().equals(queueObject.getNickname())) return;
 
-        member.modifyNickname(queueObject.getNickname()).submit().thenAccept(a -> {
-            if (!member.getEffectiveName().equalsIgnoreCase(queueObject.getNickname()))
-                add(queueObject);
-            else
-                heart.logDebug("Changed nickname of " + ConsoleColors.PURPLE + member.getUser().getAsTag() + ConsoleColors.WHITE + " to " + ConsoleColors.PURPLE + queueObject.getNickname() + ConsoleColors.WHITE + " in " + ConsoleColors.PURPLE + guild.getName() + ConsoleColors.WHITE + ".");
-        });
+        member.modifyNickname(queueObject.getNickname()).queue();
+        heart.logDebug("Changed nickname of " + ConsoleColors.PURPLE + member.getUser().getAsTag() + ConsoleColors.WHITE + " to " + ConsoleColors.PURPLE + queueObject.getNickname() + ConsoleColors.WHITE + " in " + ConsoleColors.PURPLE + guild.getName() + ConsoleColors.WHITE + ".");
 
     }
 }

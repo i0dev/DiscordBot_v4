@@ -83,6 +83,7 @@ public class CmdFactions extends DiscordCommand {
         if (channel == null) return;
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName("Faction Confirmed")
+                .user(leader)
                 .authorImg(leader.getEffectiveAvatarUrl())
                 .content(heart.cnf().getFactionsConfirmFormat()
                         .replace("{faction}", faction)
@@ -90,7 +91,7 @@ public class CmdFactions extends DiscordCommand {
                 )
                 .build())).queue();
 
-        data.replySuccess("Successfully confirmed the faction {faction} as playing with a roster size of {size}."
+        data.replySuccess("Successfully confirmed the faction **{faction}** as playing with a roster size of **{size}**."
                 .replace("{faction}", faction)
                 .replace("{size}", size == -1 ? "Unlimited" : String.valueOf(size))
         );

@@ -8,6 +8,8 @@ echo module
 
 suggestion gamemode colors
 
+add aliases for /close, /rename
+
 reaction roles
 
 null check on api req for mojang
@@ -16,7 +18,13 @@ poll module
 
 add new ticket permissions
 
+require link to ticket for old reaction way
+
+Suggestion reaction to deny & accept
+
 In game link make so click to copy code -- it broken
+
+ticket close leaderboard not count if self close
 
 java.sql.SQLException: [SQLITE_ERROR] SQL error or missing database (near "DROP": syntax error)
         at com.i0dev.discordbot.manager.SQLManager.absenceCheck(SQLManager.java:143) ~[?:?]

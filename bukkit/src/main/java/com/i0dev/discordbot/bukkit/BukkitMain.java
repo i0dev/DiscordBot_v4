@@ -45,7 +45,6 @@ public class BukkitMain extends JavaPlugin {
         ), Bukkit.getLogger(), this);
 
         registerCmd("Link", new CmdLink(heart, "Link"));
-
     }
 
     public void registerCmd(String cmd, AbstractCommand abstractCommand) {

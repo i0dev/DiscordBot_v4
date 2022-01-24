@@ -29,6 +29,8 @@ import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -50,8 +52,8 @@ public class CmdChangelog extends DiscordCommand {
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
         String message = e.getOption("message").getAsString();
-        TextChannel channel;
-        channel = e.getOption("channel") == null ? heart.getJda().getTextChannelById(heart.cnf().getChangelogChannel()) : (TextChannel) e.getOption("channel").getAsGuildChannel();
+        GuildMessageChannel channel;
+        channel = e.getOption("channel") == null ? heart.getJda().getTextChannelById(heart.cnf().getChangelogChannel()) : (GuildMessageChannel) e.getOption("channel").getAsGuildChannel();
 
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .user(e.getUser())

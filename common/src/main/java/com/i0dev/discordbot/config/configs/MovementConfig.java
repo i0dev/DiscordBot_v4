@@ -95,13 +95,13 @@ public class MovementConfig extends AbstractConfiguration {
             )
     );
 
-    String promoteContent = "**{tag}** has been promoted to **{displayName}**.";
+    String promoteContent = "**{tag}** `({ign})`` has been promoted to **{displayName}**.";
     String promoteTitle = "Staff Promotion";
-    String demoteContent = "**{tag}** has been demoted to **{displayName}**.";
+    String demoteContent = "**{tag}** `({ign})` has been demoted to **{displayName}**.";
     String demoteTitle = "Staff Demotion";
-    String removeContent = "**{tag}** has been removed from the staff team.";
+    String removeContent = "**{tag}** `({ign})` has been removed from the staff team.";
     String removeTitle = "Staff Removal";
-    String resignContent = "**{tag}** has resigned from the staff team.";
+    String resignContent = "**{tag}** `({ign})` has resigned from the staff team.";
     String resignTitle = "Staff Resignation";
 
 }

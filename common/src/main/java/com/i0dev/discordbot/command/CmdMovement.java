@@ -160,8 +160,8 @@ public class CmdMovement extends DiscordCommand {
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(cnf.getDemoteTitle())
                 .user(member.getUser())
-                .author(e.getUser()).colorHexCode(heart.successColor())
-
+                .author(e.getUser())
+                .colorHexCode(heart.failureColor())
                 .authorImg(member.getUser().getEffectiveAvatarUrl())
                 .content(cnf.getDemoteContent()
                         .replace("{role}", role.getAsMention())
