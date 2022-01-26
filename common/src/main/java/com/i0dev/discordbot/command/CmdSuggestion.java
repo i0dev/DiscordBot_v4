@@ -37,9 +37,14 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Setter
 @Getter
@@ -79,9 +84,18 @@ public class CmdSuggestion extends DiscordCommand {
     protected void setupCommand() {
         setCommand("suggestion");
         setDescription("The suggestion module.");
+
+        List<Command.Choice> choices = new ArrayList<>();
+        if (heart.cnf().isSuggsetionRequireGamemode()) {
+            heart.cnf().getSuggestionGamemodesColorMap().forEach((s, s2) -> choices.add(new Command.Choice(s, s.toLowerCase())));
+        }
+        choices.add(new Command.Choice("Global", "global"));
+
         addSubcommand(new SubcommandData("add", "Creates a suggestion to be added to the pending channel.")
                 .addOptions(new OptionData(OptionType.STRING, "suggestion", "The suggestion you wish to make.", true))
-                .addOptions(new OptionData(OptionType.STRING, "gamemode", "The game-mode that this suggestion refers to.", false)));
+                .addOptions(new OptionData(OptionType.STRING, "gamemode", "The game-mode that this suggestion refers to.", heart.cnf().isSuggsetionRequireGamemode())
+                        .addChoices(choices))
+        );
         addSubcommand(new SubcommandData("accept", "Removes the mute from a user.")
                 .addOptions(new OptionData(OptionType.STRING, "message", "The ID of the message to accept.", true))
                 .addOptions(new OptionData(OptionType.STRING, "note", "A note about the suggestion.", false)));
@@ -100,10 +114,15 @@ public class CmdSuggestion extends DiscordCommand {
     public void add(SlashCommandEvent e, CommandEventData data) {
         String suggestion = e.getOption("suggestion").getAsString();
         String gamemode = e.getOption("gamemode") == null ? "Global" : e.getOption("gamemode").getAsString();
+        AtomicReference<String> color = new AtomicReference<>(heart.normalColor());
+        heart.cnf().getSuggestionGamemodesColorMap().forEach((s, s2) -> {
+            if (s.equalsIgnoreCase(gamemode)) color.set(s2);
+        });
 
         Message msg = pending.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(
                 EmbedMaker.builder()
                         .user(e.getUser())
+                        .colorHexCode(color.get())
                         .authorImg(e.getUser().getEffectiveAvatarUrl())
                         .authorName("Suggestion from: {tag}")
                         .content("`" + suggestion + "`")
@@ -111,7 +130,7 @@ public class CmdSuggestion extends DiscordCommand {
                         .build()
         )).complete();
 
-        Suggestion sugObj = new Suggestion(msg.getIdLong(), pending.getIdLong(), e.getUser().getIdLong(), suggestion, gamemode);
+        Suggestion sugObj = new Suggestion(msg.getIdLong(), pending.getIdLong(), e.getUser().getIdLong(), suggestion, gamemode, color.get());
         storage.getSuggestions().add(sugObj);
         ConfigUtil.save(storage);
 
@@ -162,6 +181,7 @@ public class CmdSuggestion extends DiscordCommand {
                         .authorName("Suggestion from {tag} accepted")
                         .fields(fields)
                         .author(e.getUser())
+                        .footer("Gamemode: " + suggestion.getGamemode())
                         .authorImg(user.getEffectiveAvatarUrl())
                         .colorHexCode(heart.successColor())
                         .build()
@@ -215,6 +235,7 @@ public class CmdSuggestion extends DiscordCommand {
                         .authorName("Suggestion from {tag} denied")
                         .fields(fields)
                         .author(e.getUser())
+                        .footer("Gamemode: " + suggestion.getGamemode())
                         .authorImg(user.getEffectiveAvatarUrl())
                         .colorHexCode(heart.failureColor())
                         .build()

@@ -129,11 +129,8 @@ public class CmdTicket extends DiscordCommand {
         if (!ticketCheck(e, data)) return;
         User user = e.getOption("user").getAsUser();
         ((TextChannel) e.getChannel()).putPermissionOverride(Objects.requireNonNull(e.getGuild().getMember(user)))
-                .setAllow(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
-                .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .setAllow(getAllowedPermissions())
+                .setDeny(getAllowedDeniedPermissions())
                 .queue();
         data.reply(EmbedMaker.builder()
                 .user(user)
@@ -148,7 +145,7 @@ public class CmdTicket extends DiscordCommand {
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         if (ticket.isAdminOnlyMode()) {
             ticket.setAdminOnlyMode(false);
-            setTicketNormalaMode(ticket);
+            setTicketNormalMode(ticket);
             data.replySuccess("Ticket is no longer admin only.");
             return;
         } else {
@@ -165,7 +162,6 @@ public class CmdTicket extends DiscordCommand {
         String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("reason").getAsString();
         closeTicket(ticket, reason, e.getUser());
         if (e.isAcknowledged()) return;
-        if (e.getInteraction() == null) return;
         e.deferReply().queue();
     }
 
@@ -273,11 +269,7 @@ public class CmdTicket extends DiscordCommand {
         if (!ticketCheck(e, data)) return;
         User user = e.getOption("user").getAsUser();
         ((TextChannel) e.getChannel()).putPermissionOverride(e.getGuild().getMember(user))
-                .setDeny(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
-                        Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .setDeny(getDeniedPermissions())
                 .queue();
 
         data.reply(EmbedMaker.builder()
@@ -328,7 +320,7 @@ public class CmdTicket extends DiscordCommand {
         return isTicket;
     }
 
-    public void setTicketNormalaMode(Ticket ticket) {
+    public void setTicketNormalMode(Ticket ticket) {
         TextChannel channel = heart.getJda().getTextChannelById(ticket.getChannelID());
         if (channel == null) return;
         TicketOption option = getTicketOptionById(ticket.getTicketID());
@@ -337,11 +329,8 @@ public class CmdTicket extends DiscordCommand {
             Role role = channel.getGuild().getRoleById(roleID);
             if (role == null) continue;
             channel.putPermissionOverride(role)
-                    .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
-                    .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                            Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                    .setAllow(getAllowedPermissions())
+                    .setDeny(getAllowedDeniedPermissions())
                     .queue();
         }
     }
@@ -351,13 +340,36 @@ public class CmdTicket extends DiscordCommand {
             Role role = channel.getGuild().getRoleById(roleID);
             if (role == null) continue;
             channel.putPermissionOverride(role)
-                    .setDeny(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
-                            Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                            Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                    .setDeny(getDeniedPermissions())
                     .queue();
         }
+    }
+
+    public List<Permission> getDeniedPermissions() {
+        return Arrays.asList(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
+                Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
+                Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
+                Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL,
+                Permission.MESSAGE_SEND_IN_THREADS, Permission.CREATE_PUBLIC_THREADS, Permission.CREATE_PRIVATE_THREADS,
+                Permission.MESSAGE_EXT_STICKER, Permission.MANAGE_THREADS, Permission.USE_APPLICATION_COMMANDS
+        );
+    }
+
+    public List<Permission> getAllowedPermissions() {
+        return Arrays.asList(
+                Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
+                Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
+                Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE, Permission.MESSAGE_SEND_IN_THREADS, Permission.MESSAGE_EXT_STICKER
+        );
+    }
+
+    public List<Permission> getAllowedDeniedPermissions() {
+        return Arrays.asList(
+                Permission.MANAGE_CHANNEL, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_WEBHOOKS, Permission.CREATE_PRIVATE_THREADS,
+                Permission.CREATE_PUBLIC_THREADS, Permission.MESSAGE_MENTION_EVERYONE, Permission.MANAGE_THREADS,
+                Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS
+        );
     }
 
     public void setTicketAdminOnly(Ticket ticket) {
@@ -370,9 +382,7 @@ public class CmdTicket extends DiscordCommand {
             Role role = channel.getGuild().getRoleById(roleID);
             if (role == null) continue;
             channel.putPermissionOverride(role)
-                    .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                            Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                            Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE)
+                    .setAllow(getAllowedPermissions())
                     .queue();
         }
     }
@@ -395,23 +405,16 @@ public class CmdTicket extends DiscordCommand {
         ConfigUtil.save(storage);
 
         channel.putPermissionOverride(member)
-                .setAllow(Permission.VIEW_CHANNEL, Permission.USE_APPLICATION_COMMANDS, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE, Permission.USE_APPLICATION_COMMANDS)
-                .setDeny(Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .setAllow(getAllowedPermissions())
+                .setDeny(getAllowedDeniedPermissions())
                 .queue();
 
         channel.putPermissionOverride(guild.getPublicRole())
-                .setDeny(Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND, Permission.MESSAGE_ATTACH_FILES,
-                        Permission.MESSAGE_EXT_EMOJI, Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_HISTORY,
-                        Permission.MESSAGE_ADD_REACTION, Permission.CREATE_INSTANT_INVITE,
-                        Permission.MESSAGE_MENTION_EVERYONE, Permission.MESSAGE_MANAGE, Permission.MESSAGE_TTS,
-                        Permission.MANAGE_WEBHOOKS, Permission.MANAGE_PERMISSIONS, Permission.MANAGE_CHANNEL)
+                .setDeny(getDeniedPermissions())
                 .queue();
 
         if (option.isAdminOnlyDefault()) setTicketAdminOnly(ticket);
-        else setTicketNormalaMode(ticket);
+        else setTicketNormalMode(ticket);
         List<String> toPing = Arrays.asList(owner.getAsMention());
         if (option.isPingStaff()) {
             if (option.getRolesToPing().isEmpty()) {
@@ -488,7 +491,7 @@ public class CmdTicket extends DiscordCommand {
 
 
     @SneakyThrows
-    void closeTicket(Ticket ticket, String reason, User closer) {
+    public void closeTicket(Ticket ticket, String reason, User closer) {
         File ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + ticket.getChannelID() + ".log");
         TextChannel channel = heart.getJda().getTextChannelById(ticket.getChannelID());
         DiscordUser discordUser = heart.genMgr().getDiscordUser(closer);
@@ -501,8 +504,16 @@ public class CmdTicket extends DiscordCommand {
         ticketLogsFile = new File(heart.getDataFolder() + "/ticketLogs/" + ticket.getChannelID() + ".log");
         User ticketOwner = heart.getJda().retrieveUserById(ticket.getTicketOwnerID()).complete();
 
-        discordUser.setTicketsClosed(discordUser.getTicketsClosed() + 1);
-        discordUser.save();
+
+        if (closer.getIdLong() == ticket.getTicketOwnerID()) {
+            if (cnf.isCountSelfClosedTicketsTowardsTicketTop()) {
+                discordUser.setTicketsClosed(discordUser.getTicketsClosed() + 1);
+                discordUser.save();
+            }
+        } else {
+            discordUser.setTicketsClosed(discordUser.getTicketsClosed() + 1);
+            discordUser.save();
+        }
 
         channel.delete().queueAfter(5, TimeUnit.SECONDS);
 
@@ -565,7 +576,7 @@ public class CmdTicket extends DiscordCommand {
 
             if (ticket.isAdminOnlyMode()) {
                 ticket.setAdminOnlyMode(false);
-                setTicketNormalaMode(ticket);
+                setTicketNormalMode(ticket);
                 e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is no longer admin only.").build())).queue();
             } else {
                 ticket.setAdminOnlyMode(true);

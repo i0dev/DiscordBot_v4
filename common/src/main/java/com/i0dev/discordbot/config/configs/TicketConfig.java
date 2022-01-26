@@ -58,6 +58,7 @@ public class TicketConfig extends AbstractConfiguration {
     boolean ticketCreateButtonMode = true;
     boolean allowTicketOwnerToCloseOwnTicket = true;
     boolean allowTicketOwnerToAdminOnly = true;
+    boolean countSelfClosedTicketsTowardsTicketTop = false;
 
     String ticketPanelDescription = "Click the corresponding button to create a ticket. If the matter of the ticket has sensitive information, please ask for the ticket to be made admin-only.";
 

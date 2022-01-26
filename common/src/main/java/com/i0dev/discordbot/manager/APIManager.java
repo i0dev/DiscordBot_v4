@@ -68,8 +68,12 @@ public class APIManager extends AbstractManager {
             rd.close();
             conn.disconnect();
             if (result.toString().contains("�")) return null;
-            return (JSONObject) new JSONParser().parse(result.toString());
-        } catch (ParseException | IOException exception) {
+            try {
+                return (JSONObject) new JSONParser().parse(result.toString());
+            } catch (Exception ignored) {
+                return null;
+            }
+        } catch (IOException exception) {
             exception.printStackTrace();
             return null;
         }

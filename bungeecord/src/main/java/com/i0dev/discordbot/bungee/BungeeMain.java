@@ -39,7 +39,6 @@ public class BungeeMain extends Plugin {
 
     @Override
     public void onEnable() {
-        System.out.println("[DEBUG] BungeeMain.onEnable() - enabled");
         heart = new Heart(Arrays.asList(
                 StartupTag.BUNGEE,
                 StartupTag.PLUGIN

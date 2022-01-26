@@ -52,10 +52,11 @@ public class CmdChangelog extends DiscordCommand {
     @Override
     public void execute(SlashCommandEvent e, CommandEventData data) {
         String message = e.getOption("message").getAsString();
-        GuildMessageChannel channel;
-        channel = e.getOption("channel") == null ? heart.getJda().getTextChannelById(heart.cnf().getChangelogChannel()) : (GuildMessageChannel) e.getOption("channel").getAsGuildChannel();
+        GuildChannel channel;
+        channel = e.getOption("channel") == null ? heart.getJda().getGuildChannelById(heart.cnf().getChangelogChannel()) : e.getOption("channel").getAsGuildChannel();
 
-        channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+
+        ((GuildMessageChannel) channel).sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .user(e.getUser())
                 .authorName("Changelog post from {tag}")
                 .authorImg(e.getUser().getEffectiveAvatarUrl())

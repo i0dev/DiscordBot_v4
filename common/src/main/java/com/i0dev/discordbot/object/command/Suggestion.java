@@ -34,6 +34,6 @@ import lombok.Setter;
 @Setter
 public class Suggestion {
     long messageID, channelID, userID;
-    String suggestion, gamemode;
+    String suggestion, gamemode, colorHex;
 
 }

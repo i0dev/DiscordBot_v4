@@ -62,7 +62,6 @@ public class DiscordCommandManager extends AbstractManager {
                 if (!hasPermission(e, command)) {
                     if (!e.isAcknowledged())
                         e.reply("You don't have permission to use this command!").setEphemeral(true).queue();
-
                     return;
                 }
                 if (isBlacklisted(data.getDiscordUser())) {
@@ -114,39 +113,10 @@ public class DiscordCommandManager extends AbstractManager {
     @Deprecated
     public boolean hasPermission(SlashCommandEvent e, DiscordCommand cmd) {
         String cmdID = e.getCommandPath().replace("/", "_").toLowerCase();
-
-        return heart.genMgr().hasPermission(e.getMember(), cmdID, e);
-
-/*
-        if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.cnf().isAdministratorBypassPermissions())
-            return true;
-        AtomicBoolean allowed = new AtomicBoolean(false);
-        PermissionNode node = heart.getConfig(PermissionConfig.class).getPermissions().stream().filter(permissionNode -> permissionNode.getCommandID().equalsIgnoreCase(cmdID)).findFirst().orElse(null);
-
-        heart.logDebug(node + "");
-        heart.logDebug(e.getCommandPath().replace("/", "_").toLowerCase());
-
-        if (node == null) {
-            if (!e.getMember().hasPermission(Permission.ADMINISTRATOR))
-                e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
-                        .colorHexCode(heart.failureColor())
-                        .content("This command has no permissions set in config so it is default to admin only!\n" +
-                                "Reference commandID: `" + cmdID + "`")
-                        .build())).queue();
-            return e.getMember().hasPermission(Permission.ADMINISTRATOR);
-        }
-
-        List<Long> usersRoleIds = e.getMember().getRoles().stream().map(Role::getIdLong).collect(Collectors.toList());
-        if (node.getUsersAllowed().contains(e.getUser().getIdLong())) allowed.set(true);
-        if (anyMatch(node.getRolesAllowed(), usersRoleIds)) allowed.set(true);
-        if (node.isEveryoneAllowed()) allowed.set(true);
-        if (node.isRequireAdministrator() && !e.getMember().hasPermission(Permission.ADMINISTRATOR)) allowed.set(false);
-        if (anyMatch(node.getRolesDenied(), usersRoleIds)) allowed.set(false);
-        if (node.getUsersDenied().contains(e.getUser().getIdLong())) allowed.set(false);
-
-        return allowed.get();
-        */
-
+        String permission = cmdID;
+        if (!cmd.getPermissionOverride().equals(""))
+            permission = cmd.getPermissionOverride();
+        return heart.genMgr().hasPermission(e.getMember(), permission, e);
     }
 
     public boolean hasPermission(ButtonClickEvent e, String commandID) {

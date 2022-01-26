@@ -28,6 +28,8 @@ package com.i0dev.discordbot;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.i0dev.discordbot.command.*;
+import com.i0dev.discordbot.command.aliases.CmdClose;
+import com.i0dev.discordbot.command.aliases.CmdRename;
 import com.i0dev.discordbot.command.fun.CmdCoinflip;
 import com.i0dev.discordbot.command.gamemode.CmdFactions;
 import com.i0dev.discordbot.command.general.*;
@@ -218,7 +220,9 @@ public class Heart {
                 new CmdGiveaway(this),
                 new CmdFactions(this),
                 new CmdCommandInfo(this),
-                new CmdMovement(this)
+                new CmdMovement(this),
+                new CmdClose(this),
+                new CmdRename(this)
         ));
         commands.forEach(command -> {
             command.initialize();
@@ -276,6 +280,7 @@ public class Heart {
         if (executorService != null) executorService.shutdown();
         if (sqlMgr() != null && sqlMgr().getConnection() != null) sqlMgr().getConnection().close();
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Shutdown." + ConsoleColors.RESET);
+        if (tags.contains(StartupTag.STANDALONE)) System.exit(0);
     }
 
     @SneakyThrows
@@ -385,6 +390,11 @@ public class Heart {
     public <T> T getManager(Class<T> clazz) {
         return (T) managers.stream().filter(manager -> manager.getClass().equals(clazz)).findFirst().orElse(null);
     }
+
+    public <T> T getCommand(Class<T> clazz) {
+        return (T) commands.stream().filter(command -> command.getClass().equals(clazz)).findFirst().orElse(null);
+    }
+
 
     public <T> T getConfig(Class<T> clazz) {
         return (T) configs.stream().filter(config -> config.getClass().equals(clazz)).findFirst().orElse(null);

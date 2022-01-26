@@ -84,6 +84,8 @@ public class GeneralConfig extends AbstractConfiguration {
 
     String suggestionUpvoteEmoji = "U+1F44D";
     String suggestionDownvoteEmoji = "U+1F44E";
+    boolean suggsetionRequireGamemode = true;
+    Map<String, String> suggestionGamemodesColorMap = Collections.singletonMap("Factions", "#ff6666");
 
     String newGiveawayFormat = "Prize: `{prize}`\nHost: `{tag}`\nWinners: `{winners}`\nEnding: {time}\n\nReact with the emoji below to enter the giveaway!";
     String giveawayEmoji = "U+1F389";

@@ -48,6 +48,7 @@ import java.util.List;
 public abstract class DiscordCommand extends ListenerAdapter {
 
     protected boolean registerListener = false;
+    protected String permissionOverride = "";
     protected Heart heart;
     // Command Data
     protected String command, description;

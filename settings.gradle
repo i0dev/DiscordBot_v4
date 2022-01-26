@@ -3,5 +3,6 @@ rootProject.name = 'DiscordBot'
 include(
         'bukkit',
         'bungeecord',
-        'common'
+        'common',
+        'standalone'
 )
