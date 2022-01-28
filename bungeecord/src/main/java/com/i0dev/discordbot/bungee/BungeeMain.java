@@ -50,6 +50,7 @@ public class BungeeMain extends Plugin {
 
     @Override
     public void onDisable() {
-        heart.shutdown();
+        if (heart != null)
+            heart.shutdown();
     }
 }

@@ -55,6 +55,7 @@ public class BukkitMain extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        heart.shutdown();
+        if (heart != null)
+            heart.shutdown();
     }
 }
