@@ -34,7 +34,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.NewsChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -55,7 +55,7 @@ public class CmdAnnounce extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         GuildChannel channel = e.getOption("channel").getAsGuildChannel();
         String color = e.getOption("color") == null ? heart.normalColor() : e.getOption("color").getAsString();
         boolean embed = e.getOption("embed") == null || e.getOption("embed").getAsBoolean();

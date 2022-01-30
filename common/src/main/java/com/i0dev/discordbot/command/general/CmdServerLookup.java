@@ -30,7 +30,7 @@ import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import lombok.SneakyThrows;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.json.simple.JSONObject;
@@ -51,7 +51,7 @@ public class CmdServerLookup extends DiscordCommand {
 
     @SneakyThrows
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         String ip = e.getOption("address").getAsString();
         JSONObject json = heart.apiMgr().MinecraftServerLookup(ip);
         if (json == null) {

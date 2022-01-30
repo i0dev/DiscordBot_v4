@@ -33,7 +33,7 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -61,14 +61,14 @@ public class CmdBlacklist extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("add".equals(e.getSubcommandName())) add(e, data);
         if ("remove".equals(e.getSubcommandName())) remove(e, data);
         if ("list".equals(e.getSubcommandName())) list(e, data);
         if ("clear".equals(e.getSubcommandName())) clear(e, data);
     }
 
-    public void add(SlashCommandEvent e, CommandEventData data) {
+    public void add(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         DiscordUser discordUser = heart.genMgr().getDiscordUser(user.getIdLong());
         if (discordUser.isBlacklisted()) {
@@ -90,7 +90,7 @@ public class CmdBlacklist extends DiscordCommand {
                 .build());
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         DiscordUser discordUser = heart.genMgr().getDiscordUser(user.getIdLong());
         if (!discordUser.isBlacklisted()) {
@@ -113,7 +113,7 @@ public class CmdBlacklist extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void list(SlashCommandEvent e, CommandEventData data) {
+    public void list(SlashCommandInteractionEvent e, CommandEventData data) {
         List<String> list = new ArrayList<>();
         ResultSet result = heart.sqlMgr().runQueryWithResult("select * from DiscordUser where blacklisted = 1;");
         while (result.next()) {
@@ -140,7 +140,7 @@ public class CmdBlacklist extends DiscordCommand {
                 .build());
     }
 
-    public void clear(SlashCommandEvent e, CommandEventData data) {
+    public void clear(SlashCommandInteractionEvent e, CommandEventData data) {
         heart.sqlMgr().runQuery("update DiscordUser set blacklisted = 0;");
 
         data.reply(EmbedMaker.builder()

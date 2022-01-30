@@ -31,7 +31,7 @@ import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -49,7 +49,7 @@ public class CmdKick extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         e.getGuild().kick(user.getId()).queue();
         data.reply(EmbedMaker.builder()

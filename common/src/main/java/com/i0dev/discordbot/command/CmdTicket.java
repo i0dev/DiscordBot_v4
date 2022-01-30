@@ -44,14 +44,16 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.Button;
+
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.io.File;
@@ -113,7 +115,7 @@ public class CmdTicket extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("add".equals(e.getSubcommandName())) add(e, data);
         if ("admin_only".equals(e.getSubcommandName())) adminOnly(e, data);
         if ("close".equals(e.getSubcommandName())) close(e, data);
@@ -125,7 +127,7 @@ public class CmdTicket extends DiscordCommand {
         if ("manual".equals(e.getSubcommandName())) manual(e, data);
     }
 
-    public void add(SlashCommandEvent e, CommandEventData data) {
+    public void add(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         User user = e.getOption("user").getAsUser();
         ((TextChannel) e.getChannel()).putPermissionOverride(Objects.requireNonNull(e.getGuild().getMember(user)))
@@ -140,7 +142,7 @@ public class CmdTicket extends DiscordCommand {
                 .build());
     }
 
-    public void adminOnly(SlashCommandEvent e, CommandEventData data) {
+    public void adminOnly(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         if (ticket.isAdminOnlyMode()) {
@@ -156,7 +158,7 @@ public class CmdTicket extends DiscordCommand {
         ConfigUtil.save(storage);
     }
 
-    public void close(SlashCommandEvent e, CommandEventData data) {
+    public void close(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("reason").getAsString();
@@ -165,7 +167,7 @@ public class CmdTicket extends DiscordCommand {
         e.deferReply().queue();
     }
 
-    public void info(SlashCommandEvent e, CommandEventData data) {
+    public void info(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         StringBuilder msg = new StringBuilder();
@@ -182,7 +184,7 @@ public class CmdTicket extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void leaderboard(SlashCommandEvent e, CommandEventData data) {
+    public void leaderboard(SlashCommandInteractionEvent e, CommandEventData data) {
         List<String> list = new ArrayList<>();
         ResultSet result = heart.sqlMgr().runQueryWithResult("select * from DiscordUser where ticketsClosed != 0 ORDER BY ticketsClosed DESC LIMIT " + cnf.getTicketTopMaxDisplay());
         int count = 1;
@@ -213,7 +215,7 @@ public class CmdTicket extends DiscordCommand {
                 .build());
     }
 
-    public void panel(SlashCommandEvent e, CommandEventData data) {
+    public void panel(SlashCommandInteractionEvent e, CommandEventData data) {
         boolean pin = e.getOption("pin").getAsBoolean();
         String image = e.getOption("image") == null ? null : e.getOption("image").getAsString();
         StringBuilder msg = new StringBuilder();
@@ -265,7 +267,7 @@ public class CmdTicket extends DiscordCommand {
         e.reply("Ticket panel sent.").setEphemeral(true).queue();
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         User user = e.getOption("user").getAsUser();
         ((TextChannel) e.getChannel()).putPermissionOverride(e.getGuild().getMember(user))
@@ -280,7 +282,7 @@ public class CmdTicket extends DiscordCommand {
                 .build());
     }
 
-    public void rename(SlashCommandEvent e, CommandEventData data) {
+    public void rename(SlashCommandInteractionEvent e, CommandEventData data) {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         String newTicketName = e.getOption("name").getAsString().replace(" ", "-") + "-" + ticket.getTicketNumber();
@@ -290,7 +292,7 @@ public class CmdTicket extends DiscordCommand {
         data.replySuccess("Renamed the ticket to: " + newTicketName.toLowerCase());
     }
 
-    public void manual(SlashCommandEvent e, CommandEventData data) {
+    public void manual(SlashCommandInteractionEvent e, CommandEventData data) {
         if (heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) != null) {
             data.replyFailure("This channel is already a ticket.");
             return;
@@ -314,7 +316,7 @@ public class CmdTicket extends DiscordCommand {
         return heart.getConfig(TicketStorage.class).getTicketByID(channelID) != null;
     }
 
-    public boolean ticketCheck(SlashCommandEvent e, CommandEventData data) {
+    public boolean ticketCheck(SlashCommandInteractionEvent e, CommandEventData data) {
         boolean isTicket = heart.getConfig(TicketStorage.class).getTicketByID(e.getChannel().getId()) != null;
         if (!isTicket) data.replyFailure("This command can only be used in a ticket channel.");
         return isTicket;
@@ -552,7 +554,7 @@ public class CmdTicket extends DiscordCommand {
 
     // Create & Admin Only Handler
     @Override
-    public void onButtonClick(ButtonClickEvent e) {
+    public void onButtonInteraction(ButtonInteractionEvent e) {
         if (e.getUser().isBot()) return;
         if (e.getGuild() == null) return;
         if (!heart.genMgr().isAllowedGuild(e.getGuild())) return;

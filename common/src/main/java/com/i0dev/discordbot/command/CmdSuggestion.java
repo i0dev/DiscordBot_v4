@@ -36,7 +36,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -105,13 +105,13 @@ public class CmdSuggestion extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("add".equals(e.getSubcommandName())) add(e, data);
         if ("accept".equals(e.getSubcommandName())) accept(e, data);
         if ("deny".equals(e.getSubcommandName())) deny(e, data);
     }
 
-    public void add(SlashCommandEvent e, CommandEventData data) {
+    public void add(SlashCommandInteractionEvent e, CommandEventData data) {
         String suggestion = e.getOption("suggestion").getAsString();
         String gamemode = e.getOption("gamemode") == null ? "Global" : e.getOption("gamemode").getAsString();
         AtomicReference<String> color = new AtomicReference<>(heart.normalColor());
@@ -144,7 +144,7 @@ public class CmdSuggestion extends DiscordCommand {
                 .build());
     }
 
-    public void accept(SlashCommandEvent e, CommandEventData data) {
+    public void accept(SlashCommandInteractionEvent e, CommandEventData data) {
         String id = e.getOption("message").getAsString();
         Suggestion suggestion = storage.getSuggestionById(id);
 
@@ -199,7 +199,7 @@ public class CmdSuggestion extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void deny(SlashCommandEvent e, CommandEventData data) {
+    public void deny(SlashCommandInteractionEvent e, CommandEventData data) {
         String id = e.getOption("message").getAsString();
         Suggestion suggestion = storage.getSuggestionById(id);
 

@@ -8,7 +8,7 @@ import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.command.Ticket;
 import com.i0dev.discordbot.util.ConfigUtil;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -27,7 +27,7 @@ public class CmdRename extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         CmdTicket cmdTicket = heart.getCommand(CmdTicket.class);
 
         if (!cmdTicket.ticketCheck(e, data)) return;

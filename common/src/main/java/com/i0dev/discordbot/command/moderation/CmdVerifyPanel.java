@@ -34,11 +34,13 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+
 
 public class CmdVerifyPanel extends DiscordCommand {
     public CmdVerifyPanel(Heart heart) {
@@ -55,7 +57,7 @@ public class CmdVerifyPanel extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         boolean pin = e.getOption("pin") != null && e.getOption("pin").getAsBoolean();
         Message message = e.getTextChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                         .user(e.getUser())
@@ -70,7 +72,7 @@ public class CmdVerifyPanel extends DiscordCommand {
     }
 
     @Override
-    public void onButtonClick(ButtonClickEvent e) {
+    public void onButtonInteraction(ButtonInteractionEvent e) {
         if (e.getButton() == null) return;
         if (!"BUTTON_VERIFY_PANEL".equalsIgnoreCase(e.getButton().getId())) return;
         if (e.getUser().isBot()) return;

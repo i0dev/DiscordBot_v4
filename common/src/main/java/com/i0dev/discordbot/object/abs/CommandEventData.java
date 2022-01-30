@@ -30,7 +30,7 @@ import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @Getter
 public class CommandEventData {
@@ -38,9 +38,9 @@ public class CommandEventData {
     // Custom
     DiscordUser discordUser;
     Heart heart;
-    SlashCommandEvent event;
+    SlashCommandInteractionEvent event;
 
-    public CommandEventData(Heart heart, SlashCommandEvent event) {
+    public CommandEventData(Heart heart, SlashCommandInteractionEvent event) {
         this.heart = heart;
         this.event = event;
         this.discordUser = heart.genMgr().getDiscordUser(event.getUser().getIdLong());

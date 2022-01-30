@@ -32,7 +32,7 @@ import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.util.Utility;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class CmdRoles extends DiscordCommand {
 
@@ -48,7 +48,7 @@ public class CmdRoles extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         data.reply(EmbedMaker.builder()
                 .field(new MessageEmbed.Field("__List of guild roles__", Utility.formatRolesList(e.getGuild().getRoles()), true))
                 .build());

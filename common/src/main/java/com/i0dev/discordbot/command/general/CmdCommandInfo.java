@@ -33,7 +33,7 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.config.PermissionNode;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -57,7 +57,7 @@ public class CmdCommandInfo extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         String commandID = e.getOption("command_id").getAsString();
         data.replyFailure("Command is temporarily unavailable.");
          /*

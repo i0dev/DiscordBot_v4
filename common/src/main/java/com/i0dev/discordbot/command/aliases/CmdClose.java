@@ -6,7 +6,7 @@ import com.i0dev.discordbot.object.Requirement;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.command.Ticket;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
@@ -25,7 +25,7 @@ public class CmdClose extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         CmdTicket cmdTicket = heart.getCommand(CmdTicket.class);
         if (!cmdTicket.ticketCheck(e, data)) return;
         Ticket ticket = cmdTicket.getStorage().getTicketByID(e.getChannel().getId());

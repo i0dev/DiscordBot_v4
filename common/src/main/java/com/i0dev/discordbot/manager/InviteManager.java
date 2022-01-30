@@ -33,12 +33,14 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.guild.invite.GuildInviteCreateEvent;
 import net.dv8tion.jda.api.events.guild.invite.GuildInviteDeleteEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,9 +123,8 @@ public class InviteManager extends AbstractManager {
     }
 
     @Override
-    public void onGuildReady(GuildReadyEvent event) {
-        final Guild guild = event.getGuild();
-        attemptInviteCaching(guild);
+    public void onReady(@NotNull ReadyEvent e) {
+        heart.getAllowedGuilds().forEach(InviteManager::attemptInviteCaching);
     }
 
     @SneakyThrows

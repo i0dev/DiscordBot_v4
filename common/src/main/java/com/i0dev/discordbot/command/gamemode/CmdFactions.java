@@ -33,7 +33,7 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.command.Giveaway;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -58,12 +58,12 @@ public class CmdFactions extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("leader".equals(e.getSubcommandName())) leader(e, data);
         if ("confirm".equals(e.getSubcommandName())) confirm(e, data);
     }
 
-    public void leader(SlashCommandEvent e, CommandEventData data) {
+    public void leader(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
 
         DiscordUser discordUser = getHeart().genMgr().getDiscordUser(user);
@@ -74,7 +74,7 @@ public class CmdFactions extends DiscordCommand {
 
     }
 
-    public void confirm(SlashCommandEvent e, CommandEventData data) {
+    public void confirm(SlashCommandInteractionEvent e, CommandEventData data) {
         User leader = e.getOption("leader").getAsUser();
         String faction = e.getOption("faction").getAsString();
         long size = e.getOption("size").getAsLong();

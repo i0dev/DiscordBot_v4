@@ -44,7 +44,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -73,14 +73,14 @@ public class CmdGiveaway extends DiscordCommand {
                 .addOptions(new OptionData(OptionType.STRING, "message", "The ID of the giveaway message.", true)));
     }
 
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("create".equals(e.getSubcommandName())) create(e, data);
         if ("end".equals(e.getSubcommandName())) end(e, data);
         if ("info".equals(e.getSubcommandName())) info(e, data);
         if ("reroll".equals(e.getSubcommandName())) reroll(e, data);
     }
 
-    public void create(SlashCommandEvent e, CommandEventData data) {
+    public void create(SlashCommandInteractionEvent e, CommandEventData data) {
         TextChannel channel = (TextChannel) e.getOption("channel").getAsGuildChannel();
         String prize = e.getOption("prize").getAsString();
         short winners = (short) (e.getOption("winners").getAsLong());
@@ -95,7 +95,7 @@ public class CmdGiveaway extends DiscordCommand {
         data.replySuccess("Giveaway successfully created!");
     }
 
-    public void end(SlashCommandEvent e, CommandEventData data) {
+    public void end(SlashCommandInteractionEvent e, CommandEventData data) {
         long message = Long.parseLong(e.getOption("message").getAsString());
         Giveaway giveaway = this.getGiveaway(message);
         if (this.getGiveaway(message) == null) {
@@ -107,7 +107,7 @@ public class CmdGiveaway extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void info(SlashCommandEvent e, CommandEventData data) {
+    public void info(SlashCommandInteractionEvent e, CommandEventData data) {
         long message = Long.parseLong(e.getOption("message").getAsString());
         Giveaway giveaway = this.getGiveaway(message);
         if (this.getGiveaway(message) == null) {
@@ -119,7 +119,7 @@ public class CmdGiveaway extends DiscordCommand {
         }
     }
 
-    public void reroll(SlashCommandEvent e, CommandEventData data) {
+    public void reroll(SlashCommandInteractionEvent e, CommandEventData data) {
         long message = Long.parseLong(e.getOption("message").getAsString());
         Giveaway giveaway = this.getGiveaway(message);
         if (this.getGiveaway(message) == null) {

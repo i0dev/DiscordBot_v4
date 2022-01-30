@@ -34,15 +34,12 @@ import com.i0dev.discordbot.object.config.PermissionGroup;
 import com.i0dev.discordbot.object.config.PermissionNode;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -162,7 +159,7 @@ public class GeneralManager extends AbstractManager {
     Permissions
      */
 
-    public boolean hasPermission(Member member, String cmdID, GenericInteractionCreateEvent e) {
+    public boolean hasPermission(Member member, String cmdID, IReplyCallback e) {
         if (member == null) return false;
         if (heart.cnf().isAdministratorBypassPermissions() && member.hasPermission(Permission.ADMINISTRATOR))
             return true;
@@ -246,6 +243,7 @@ public class GeneralManager extends AbstractManager {
 
     @Override
     public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent e) {
+        if (!heart.cnf().isForceNicknameForLinkedUsers()) return;
         DiscordUser user = heart.genMgr().getDiscordUser(e.getUser());
         if (user == null) return;
         user.refreshNickname();
@@ -253,6 +251,7 @@ public class GeneralManager extends AbstractManager {
 
     @Override
     public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent e) {
+        if (!heart.cnf().isForceNicknameForLinkedUsers()) return;
         DiscordUser user = heart.genMgr().getDiscordUser(e.getUser());
         if (user == null) return;
         user.refreshNickname();

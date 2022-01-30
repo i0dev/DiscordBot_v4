@@ -38,8 +38,8 @@ import com.i0dev.discordbot.object.config.PermissionNode;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +52,7 @@ public class DiscordCommandManager extends AbstractManager {
     }
 
     @Override
-    public void onSlashCommand(SlashCommandEvent e) {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent e) {
         CommandEventData data = new CommandEventData(heart, e);
         DiscordUser user = heart.genMgr().getDiscordUser(e.getUser().getIdLong());
         for (DiscordCommand command : heart.getCommands()) {
@@ -111,7 +111,7 @@ public class DiscordCommandManager extends AbstractManager {
     }
 
     @Deprecated
-    public boolean hasPermission(SlashCommandEvent e, DiscordCommand cmd) {
+    public boolean hasPermission(SlashCommandInteractionEvent e, DiscordCommand cmd) {
         String cmdID = e.getCommandPath().replace("/", "_").toLowerCase();
         String permission = cmdID;
         if (!cmd.getPermissionOverride().equals(""))
@@ -119,7 +119,7 @@ public class DiscordCommandManager extends AbstractManager {
         return heart.genMgr().hasPermission(e.getMember(), permission, e);
     }
 
-    public boolean hasPermission(ButtonClickEvent e, String commandID) {
+    public boolean hasPermission(ButtonInteractionEvent e, String commandID) {
         String cmdID = commandID.replace("/", "_").toLowerCase();
         if (e.getGuild() != null && e.getMember() != null && e.getMember().hasPermission(Permission.ADMINISTRATOR) && heart.cnf().isAdministratorBypassPermissions())
             return true;

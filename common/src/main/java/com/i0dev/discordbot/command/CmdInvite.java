@@ -33,7 +33,7 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -74,7 +74,7 @@ public class CmdInvite extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("invites".equals(e.getSubcommandName())) invites(e, data);
         if ("leaderboard".equals(e.getSubcommandName())) leaderboard(e, data);
         if ("add".equals(e.getSubcommandName())) add(e, data);
@@ -82,7 +82,7 @@ public class CmdInvite extends DiscordCommand {
         if ("clear".equals(e.getSubcommandName())) clear(e, data);
     }
 
-    public void invites(SlashCommandEvent e, CommandEventData data) {
+    public void invites(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getUser();
         if (e.getOption("user") != null) user = e.getOption("user").getAsUser();
 
@@ -94,7 +94,7 @@ public class CmdInvite extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void leaderboard(SlashCommandEvent e, CommandEventData data) {
+    public void leaderboard(SlashCommandInteractionEvent e, CommandEventData data) {
         List<String> list = new ArrayList<>();
         ResultSet result = heart.sqlMgr().runQueryWithResult("select * from DiscordUser order by discordInvites desc limit " + heart.cnf().getInviteLeaderboardMaxDisplay());
         int place = 1;
@@ -126,7 +126,7 @@ public class CmdInvite extends DiscordCommand {
 
     }
 
-    public void add(SlashCommandEvent e, CommandEventData data) {
+    public void add(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         long amount = e.getOption("amount").getAsLong();
         DiscordUser discordUser = heart.genMgr().getDiscordUser(user.getIdLong());
@@ -141,7 +141,7 @@ public class CmdInvite extends DiscordCommand {
                 .build());
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         long amount = e.getOption("amount").getAsLong();
         DiscordUser discordUser = heart.genMgr().getDiscordUser(user.getIdLong());
@@ -157,7 +157,7 @@ public class CmdInvite extends DiscordCommand {
     }
 
 
-    public void clear(SlashCommandEvent e, CommandEventData data) {
+    public void clear(SlashCommandInteractionEvent e, CommandEventData data) {
         heart.sqlMgr().runQuery("update DiscordUser set discordInvites = 0;");
 
         data.reply(EmbedMaker.builder()

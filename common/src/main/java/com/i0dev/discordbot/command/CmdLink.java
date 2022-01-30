@@ -28,22 +28,17 @@ package com.i0dev.discordbot.command;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.manager.LinkManager;
 import com.i0dev.discordbot.object.DiscordUser;
-import com.i0dev.discordbot.object.StartupTag;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import net.dv8tion.jda.api.entities.Emoji;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.Button;
 
 import java.sql.ResultSet;
 import java.util.UUID;
@@ -80,7 +75,7 @@ public class CmdLink extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("code".equals(e.getSubcommandName())) code(e, data);
         if ("force".equals(e.getSubcommandName())) force(e, data);
         if ("info".equals(e.getSubcommandName())) info(e, data);
@@ -88,10 +83,10 @@ public class CmdLink extends DiscordCommand {
         if ("check_ign".equals(e.getSubcommandName())) check_ign(e, data);
     }
 
-    public void code(SlashCommandEvent e, CommandEventData data) {
+    public void code(SlashCommandInteractionEvent e, CommandEventData data) {
         String code = e.getOption("code").getAsString();
 
-        if (data.getDiscordUser().isLinked()){
+        if (data.getDiscordUser().isLinked()) {
             data.replyFailure("You are already linked to the ign {ign}!".replace("{ign}", data.getDiscordUser().getMinecraftIGN()));
             return;
         }
@@ -130,7 +125,7 @@ public class CmdLink extends DiscordCommand {
                 .build());
     }
 
-    public void force(SlashCommandEvent e, CommandEventData data) {
+    public void force(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         String ign = e.getOption("ign").getAsString();
 
@@ -159,7 +154,7 @@ public class CmdLink extends DiscordCommand {
                 .build());
     }
 
-    public void info(SlashCommandEvent e, CommandEventData data) {
+    public void info(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         DiscordUser discordUser = getHeart().genMgr().getDiscordUser(user);
 
@@ -178,7 +173,7 @@ public class CmdLink extends DiscordCommand {
 
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         User user = e.getOption("user").getAsUser();
         DiscordUser discordUser = getHeart().genMgr().getDiscordUser(user);
 
@@ -193,7 +188,7 @@ public class CmdLink extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void check_ign(SlashCommandEvent e, CommandEventData data) {
+    public void check_ign(SlashCommandInteractionEvent e, CommandEventData data) {
         String ign = e.getOption("ign").getAsString();
 
         ResultSet set = heart.sqlMgr().runQueryWithResult("SELECT * FROM DiscordUser WHERE MinecraftIGN = '" + ign + "'");

@@ -37,7 +37,7 @@ import lombok.Setter;
 import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -89,14 +89,14 @@ public class CmdMovement extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("promote".equals(e.getSubcommandName())) promote(e, data);
         if ("demote".equals(e.getSubcommandName())) demote(e, data);
         if ("remove".equals(e.getSubcommandName())) remove(e, data);
         if ("resign".equals(e.getSubcommandName())) resign(e, data);
     }
 
-    public void promote(SlashCommandEvent e, CommandEventData data) {
+    public void promote(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         Role role = e.getOption("role").getAsRole();
         MovementObject pastObject = getParentMovementObjectFromMember(member);
@@ -134,12 +134,11 @@ public class CmdMovement extends DiscordCommand {
         data.replySuccess("Promoted " + member.getUser().getAsTag() + " to " + role.getAsMention());
     }
 
-    public void demote(SlashCommandEvent e, CommandEventData data) {
+    public void demote(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         Role role = e.getOption("role").getAsRole();
         MovementObject pastObject = getParentMovementObjectFromMember(member);
         DiscordUser discordUser = heart.genMgr().getDiscordUser(member);
-
         if (pastObject != null) {
             discordUser.removeRole(pastObject.getMainRole());
             pastObject.getExtraRoles().forEach(discordUser::removeRole);
@@ -174,7 +173,7 @@ public class CmdMovement extends DiscordCommand {
         data.replySuccess("Demoted " + member.getUser().getAsTag() + " to " + role.getAsMention());
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         MovementObject pastObject = getParentMovementObjectFromMember(member);
         DiscordUser discordUser = heart.genMgr().getDiscordUser(member);
@@ -206,7 +205,7 @@ public class CmdMovement extends DiscordCommand {
 
     }
 
-    public void resign(SlashCommandEvent e, CommandEventData data) {
+    public void resign(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         MovementObject pastObject = getParentMovementObjectFromMember(member);
         DiscordUser discordUser = heart.genMgr().getDiscordUser(member);

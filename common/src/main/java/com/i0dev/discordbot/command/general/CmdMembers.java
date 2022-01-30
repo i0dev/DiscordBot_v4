@@ -33,7 +33,7 @@ import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class CmdMembers extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         List<Member> members = e.getGuild().getMembers();
         String info = "Members: " + "`" + members.size() + "`" + "\n" +
                 "Humans: " + "`" + members.stream().filter(member -> !member.getUser().isBot()).count() + "`" + "\n" +

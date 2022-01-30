@@ -30,7 +30,7 @@ import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -55,7 +55,7 @@ public class CmdHelp extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         long page = e.getOption("page").getAsLong();
         List<DiscordCommand> basicCommands = heart.getCommands().stream().filter(cmd -> cmd.getSubCommands().isEmpty()).collect(Collectors.toList());
         List<DiscordCommand> multiCommands = heart.getCommands().stream().filter(cmd -> !cmd.getSubCommands().isEmpty()).collect(Collectors.toList());

@@ -34,7 +34,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -69,14 +69,14 @@ public class CmdMute extends DiscordCommand {
     }
 
     @Override
-    public void execute(SlashCommandEvent e, CommandEventData data) {
+    public void execute(SlashCommandInteractionEvent e, CommandEventData data) {
         if ("add".equals(e.getSubcommandName())) add(e, data);
         if ("remove".equals(e.getSubcommandName())) remove(e, data);
         if ("list".equals(e.getSubcommandName())) list(e, data);
         if ("clear".equals(e.getSubcommandName())) clear(e, data);
     }
 
-    public void add(SlashCommandEvent e, CommandEventData data) {
+    public void add(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         String reason = "Nothing provided";
         String length = "";
@@ -120,7 +120,7 @@ public class CmdMute extends DiscordCommand {
                 .build());
     }
 
-    public void remove(SlashCommandEvent e, CommandEventData data) {
+    public void remove(SlashCommandInteractionEvent e, CommandEventData data) {
         Member member = e.getOption("user").getAsMember();
         if (!member.isTimedOut()) {
             data.reply(EmbedMaker.builder()
@@ -141,7 +141,7 @@ public class CmdMute extends DiscordCommand {
     }
 
     @SneakyThrows
-    public void list(SlashCommandEvent e, CommandEventData data) {
+    public void list(SlashCommandInteractionEvent e, CommandEventData data) {
         List<String> list = new ArrayList<>();
         e.getGuild().getMembers().stream().filter(Member::isTimedOut).forEach(m -> list.add(m.getUser().getAsTag()));
 
@@ -162,7 +162,7 @@ public class CmdMute extends DiscordCommand {
                 .build());
     }
 
-    public void clear(SlashCommandEvent e, CommandEventData data) {
+    public void clear(SlashCommandInteractionEvent e, CommandEventData data) {
         e.getGuild().getMembers().stream().filter(Member::isTimedOut).forEach(member -> member.removeTimeout().queue());
 
         data.reply(EmbedMaker.builder()

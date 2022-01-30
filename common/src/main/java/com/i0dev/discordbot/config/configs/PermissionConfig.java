@@ -637,8 +637,38 @@ public class PermissionConfig extends AbstractConfiguration {
                     false
             ),
             new PermissionNode(
-                    "command_info",
-                    Arrays.asList("Member"),
+                    "movement_promote",
+                    Arrays.asList("Administrator"),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    false
+            ),
+            new PermissionNode(
+                    "movement_demote",
+                    Arrays.asList("Administrator"),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    false
+            ),
+            new PermissionNode(
+                    "movement_remove",
+                    Arrays.asList("Administrator"),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    false,
+                    false
+            ),
+            new PermissionNode(
+                    "movement_resign",
+                    Arrays.asList("Administrator"),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     new ArrayList<>(),

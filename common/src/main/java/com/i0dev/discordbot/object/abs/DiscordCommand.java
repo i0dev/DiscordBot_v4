@@ -30,12 +30,9 @@ import com.i0dev.discordbot.object.Requirement;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
+import net.dv8tion.jda.api.interactions.commands.build.*;
 import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import java.util.ArrayList;
@@ -64,7 +61,7 @@ public abstract class DiscordCommand extends ListenerAdapter {
 
     protected abstract void setupCommand();
 
-    public abstract void execute(SlashCommandEvent e, CommandEventData data);
+    public abstract void execute(SlashCommandInteractionEvent e, CommandEventData data);
 
     protected void addOption(OptionData optionData) {
         options.add(optionData);
@@ -83,7 +80,7 @@ public abstract class DiscordCommand extends ListenerAdapter {
     }
 
     public CommandData toData() {
-        CommandData data = new CommandData(this.command, this.description);
+        SlashCommandData data = Commands.slash(this.command, this.description);
         if (!options.isEmpty()) data.addOptions(options);
         if (!groups.isEmpty()) data.addSubcommandGroups(groups);
         if (!subCommands.isEmpty()) data.addSubcommands(subCommands);
