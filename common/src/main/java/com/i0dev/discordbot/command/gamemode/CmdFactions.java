@@ -82,7 +82,7 @@ public class CmdFactions extends DiscordCommand {
         TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getFactionsConfirmedChannel());
         if (channel == null) return;
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
-                .authorName("Faction Confirmed")
+                .authorName(heart.cnf().getFactionsConfirmTitle())
                 .user(leader)
                 .authorImg(leader.getEffectiveAvatarUrl())
                 .content(heart.cnf().getFactionsConfirmFormat()

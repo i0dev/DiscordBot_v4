@@ -68,8 +68,14 @@ public class GeneralConfig extends AbstractConfiguration {
     long welcomeMessageChannel = 0L;
     long memberCounterChannel = 0L;
 
-    // Random
+    // Roles
 
+    long factionsLeaderRole = 0L;
+    long skyblockLeaderRole = 0L;
+    long prisonLeaderRole = 0L;
+
+
+    // Random
     boolean requireLinkToVerify = true;
     String notLinkedTryVerify = "You need to link your account in order to verify!\nYou can do this by typing `/link generate` on our server on any realm.\nServer IP Address: `play.MCRivals.com`";
     List<Long> verifyRolesToGive = Collections.singletonList(0L);
@@ -116,12 +122,15 @@ public class GeneralConfig extends AbstractConfiguration {
     Map<Long, String> roleToPrefixMap = Collections.singletonMap(766183472749871114L, "[Manager] ");
     String forceNicknameFormat = "{prefix}{ign}";
 
-
     boolean memberCounterEnabled = true;
     String memberCounterFormat = "Member Count: `{guildMemberCount}`";
 
     long helpRowsPerPage = 10L;
 
-    long factionsLeaderRole = 0L;
     String factionsConfirmFormat = "Faction: `{faction}`\nLeader: `{tag}`\nMembers: `{size}`";
+    String factionsConfirmTitle = "Faction Confirmed";
+    String skyblockConfirmFormat = "Island: `{team}`\nLeader: `{tag}`\nMembers: `{size}`";
+    String skyblockConfirmTitle = "Island Confirmed";
+    String prisonConfirmFormat = "Gang: `{team}`\nLeader: `{tag}`\nMembers: `{size}`";
+    String prisonConfirmTitle = "Gang confirmed";
 }

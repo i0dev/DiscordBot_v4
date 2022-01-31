@@ -44,6 +44,7 @@ public class BukkitMain extends JavaPlugin {
                 StartupTag.PLUGIN
         ), Bukkit.getLogger(), this);
 
+
         registerCmd("Link", new CmdLink(heart, "Link"));
     }
 
