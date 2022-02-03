@@ -3,3 +3,7 @@
 /gradlew
 /gradlew.bat
 /gradle/
+/bukkit/build/
+/bungeecord/build/
+/common/build/
+/standalone/build/

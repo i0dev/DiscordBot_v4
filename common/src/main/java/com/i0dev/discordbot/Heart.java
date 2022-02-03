@@ -32,11 +32,14 @@ import com.i0dev.discordbot.command.aliases.CmdClose;
 import com.i0dev.discordbot.command.aliases.CmdRename;
 import com.i0dev.discordbot.command.fun.CmdCoinflip;
 import com.i0dev.discordbot.command.gamemode.CmdFactions;
+import com.i0dev.discordbot.command.gamemode.CmdPrison;
+import com.i0dev.discordbot.command.gamemode.CmdSkyblock;
 import com.i0dev.discordbot.command.general.*;
 import com.i0dev.discordbot.command.moderation.*;
 import com.i0dev.discordbot.config.*;
 import com.i0dev.discordbot.config.configs.MovementConfig;
 import com.i0dev.discordbot.config.configs.PermissionConfig;
+import com.i0dev.discordbot.config.configs.TebexConfig;
 import com.i0dev.discordbot.config.configs.TicketConfig;
 import com.i0dev.discordbot.config.storage.CommandDataCacheStorage;
 import com.i0dev.discordbot.config.storage.GiveawayStorage;
@@ -82,7 +85,7 @@ import java.util.logging.Logger;
 @Setter
 public class Heart {
 
-    public static final String VERSION = "4.0.0";
+    public static final String VERSION = "4.0.1";
     public boolean firstStart = false;
     public Object pluginInstance;
     JDA jda;
@@ -139,7 +142,8 @@ public class Heart {
                 new PermissionConfig(this, getDataFolder() + "/configs/permissionConfig.json"),
                 new MovementConfig(this, getDataFolder() + "/configs/movementConfig.json"),
                 new AutoModConfig(this, getDataFolder() + "/configs/autoModConfig.json"),
-                new TicketConfig(this, getDataFolder() + "/configs/ticketConfig.json")
+                new TicketConfig(this, getDataFolder() + "/configs/ticketConfig.json"),
+                new TebexConfig(this, getDataFolder() + "/configs/tebexConfig.json")
 
         ));
         managers.forEach(AbstractManager::initialize);
@@ -222,7 +226,11 @@ public class Heart {
                 new CmdCommandInfo(this),
                 new CmdMovement(this),
                 new CmdClose(this),
-                new CmdRename(this)
+                new CmdRename(this),
+                new CmdPrison(this),
+                new CmdSkyblock(this),
+                new CmdTebex(this)
+
         ));
         commands.forEach(command -> {
             command.initialize();

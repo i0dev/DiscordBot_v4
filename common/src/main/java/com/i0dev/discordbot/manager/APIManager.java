@@ -51,7 +51,7 @@ public class APIManager extends AbstractManager {
         return getGeneralRequest("GET", "https://api.i0dev.com/auth/", id, "secret", "temp");
     }
 
-    private JSONObject getGeneralRequest(String method, String url, String param, String HeaderKey, String HeaderValue) {
+    public JSONObject getGeneralRequest(String method, String url, String param, String HeaderKey, String HeaderValue) {
         try {
             StringBuilder result = new StringBuilder();
             HttpURLConnection conn = (HttpURLConnection) new URL(url + param).openConnection();

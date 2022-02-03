@@ -40,10 +40,7 @@ import com.i0dev.discordbot.object.command.Giveaway;
 import com.i0dev.discordbot.util.ConfigUtil;
 import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -81,7 +78,7 @@ public class CmdGiveaway extends DiscordCommand {
     }
 
     public void create(SlashCommandInteractionEvent e, CommandEventData data) {
-        TextChannel channel = (TextChannel) e.getOption("channel").getAsGuildChannel();
+        GuildMessageChannel channel = (GuildMessageChannel) e.getOption("channel").getAsGuildChannel();
         String prize = e.getOption("prize").getAsString();
         short winners = (short) (e.getOption("winners").getAsLong());
         String length = e.getOption("length").getAsString();
