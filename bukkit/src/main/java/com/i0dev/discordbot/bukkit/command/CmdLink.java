@@ -72,7 +72,7 @@ public class CmdLink extends AbstractCommand {
             }
 
             if (lm.isOnLinkList(((Player) sender).getUniqueId())) {
-                MsgUtil.msg(sender, "&cYou are already on the link list.");
+                MsgUtil.msg(sender, "&cYou have already generated a link code.");
 
                 AtomicReference<String> pastcode = new AtomicReference<>("");
                 AtomicBoolean end = new AtomicBoolean(false);
@@ -83,7 +83,7 @@ public class CmdLink extends AbstractCommand {
                         end.set(true);
                     }
                 });
-                MsgUtil.msg(sender, "&cYour link code is: " + pastcode.get());
+                MsgUtil.msg(sender, "&cYour code is: &7" + pastcode.get());
                 return;
             }
 
