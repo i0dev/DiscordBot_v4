@@ -52,17 +52,16 @@ public class VelocityMain {
     public VelocityMain(ProxyServer server, Logger logger) {
         this.server = server;
         this.logger = logger;
-        heart = new Heart(Arrays.asList(
-                StartupTag.BUNGEE,
-                StartupTag.PLUGIN
-        ), this.logger, this);
-
     }
 
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent e) {
-        server.getCommandManager().register(new CmdLink(heart, "Link"), "link");
+        heart = new Heart(Arrays.asList(
+                StartupTag.BUNGEE,
+                StartupTag.PLUGIN
+        ), this.logger, this);
+        server.getCommandManager().register("Link",new CmdLink(heart, "Link"));
     }
 
     @Subscribe

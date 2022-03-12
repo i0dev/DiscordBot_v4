@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'com.i0dev.discordbot'
-    version = '4.0.2'
+    version = '4.0.3'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8

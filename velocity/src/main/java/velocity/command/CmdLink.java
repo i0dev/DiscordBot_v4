@@ -31,13 +31,15 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import velocity.object.AbstractCommand;
 
+import java.awt.*;
 import java.sql.ResultSet;
 import java.util.Collections;
 import java.util.List;
@@ -56,12 +58,13 @@ public class CmdLink extends AbstractCommand {
     @Override
     public void execute(CommandSource source, String @NonNull [] args) {
         if (!(source instanceof Player)) {
-            source.sendMessage(TextComponent.of("Only players can run this command").color(TextColor.RED));
+            source.sendMessage(Component.text("Only players can run this command", NamedTextColor.RED));
             return;
         }
         Player sender = (Player) source;
         if (args.length == 0) {
-            source.sendMessage(TextComponent.of("Usage: ").color(TextColor.GRAY).append(TextComponent.of("/link generate").color(TextColor.RED)));
+            source.sendMessage(Component.text("Usage: ", NamedTextColor.GRAY)
+                    .append(Component.text("/link generate", NamedTextColor.RED)));
             return;
         }
 
@@ -72,14 +75,14 @@ public class CmdLink extends AbstractCommand {
 
             if (resultSet.next()) {
                 User user = heart.genMgr().retrieveUser(Long.parseLong(resultSet.getString("id")));
-                source.sendMessage(TextComponent.of("You are already linked to the Discord account:").color(TextColor.RED)
-                        .append(TextComponent.of(user.getAsTag()).color(TextColor.GRAY).append(TextComponent.of(".").color(TextColor.RED)))
+                source.sendMessage(Component.text("You are already linked to the Discord account:", NamedTextColor.RED)
+                        .append(Component.text(user.getAsTag(), NamedTextColor.GRAY).append(Component.text(".", NamedTextColor.RED)))
                 );
                 return;
             }
 
             if (lm.isOnLinkList(sender.getUniqueId())) {
-                source.sendMessage(TextComponent.of("You have already generated a link code.").color(TextColor.RED));
+                source.sendMessage(Component.text("You have already generated a link code.", NamedTextColor.RED));
 
 
                 AtomicReference<String> pastcode = new AtomicReference<>("");
@@ -91,23 +94,23 @@ public class CmdLink extends AbstractCommand {
                         end.set(true);
                     }
                 });
-                source.sendMessage(TextComponent.of("Your code is: ").color(TextColor.RED)
-                        .append(TextComponent.of(pastcode.get()).color(TextColor.GRAY))
+                source.sendMessage(Component.text("Your code is: ", NamedTextColor.RED)
+                        .append(Component.text(pastcode.get(), NamedTextColor.GRAY))
                 );
                 return;
             }
             String code = lm.generateCode((int) heart.cnf().getLinkCodeLength());
             lm.addToLinkList(code, sender.getUniqueId());
 
-            source.sendMessage(TextComponent.of("You have generated a link code!").color(TextColor.RED));
-            source.sendMessage(TextComponent.of("Your code is: ").color(TextColor.RED)
-                    .append(TextComponent.of(code).color(TextColor.GRAY)));
-            source.sendMessage(TextComponent.of("Type the command ").color(TextColor.RED)
-                    .append(TextComponent.of("/link code " + code)).color(TextColor.GRAY)
-                    .append(TextComponent.of(" in discord.").color(TextColor.RED))
+            source.sendMessage(Component.text("You have generated a link code!", NamedTextColor.RED));
+            source.sendMessage(Component.text("Your code is: ", NamedTextColor.RED)
+                    .append(Component.text(code, NamedTextColor.GRAY)));
+            source.sendMessage(Component.text("Type the command ", NamedTextColor.RED)
+                    .append(Component.text("/link code " + code, NamedTextColor.GRAY))
+                    .append(Component.text(" in discord.", NamedTextColor.RED))
             );
 
-            source.sendMessage(TextComponent.of("(Click to get command)").decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
+            source.sendMessage(Component.text("(Click to get command)").decoration(TextDecoration.ITALIC, TextDecoration.State.TRUE)
                     .clickEvent(ClickEvent.suggestCommand("/link code " + code))
 
             );
@@ -115,7 +118,7 @@ public class CmdLink extends AbstractCommand {
             return;
         }
 
-        source.sendMessage(TextComponent.of("Usage: ").color(TextColor.GRAY).append(TextComponent.of("/link generate").color(TextColor.RED)));
+        source.sendMessage(Component.text("Usage: ").append(Component.text("/link generate")));
     }
 
 

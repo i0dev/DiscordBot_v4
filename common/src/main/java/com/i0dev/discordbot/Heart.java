@@ -85,7 +85,7 @@ import java.util.logging.Logger;
 @Setter
 public class Heart {
 
-    public static final String VERSION = "4.0.2";
+    public static final String VERSION = "4.0.3";
     public boolean firstStart = false;
     public Object pluginInstance;
     JDA jda;
