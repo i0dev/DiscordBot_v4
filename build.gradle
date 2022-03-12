@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'com.i0dev.discordbot'
-    version = '4.0.1'
+    version = '4.0.2'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -22,12 +22,6 @@ subprojects {
     jar {
         from '../LICENSE.txt'
     }
-
-    project.ext.majorVersion = '4'
-    project.ext.minorVersion = '0'
-    project.ext.patchVersion = '1'
-    project.ext.apiVersion = project.ext.majorVersion + '.' + project.ext.minorVersion
-    project.ext.fullVersion = project.ext.apiVersion + '.' + project.ext.patchVersion
 
     license {
         header = rootProject.file('HEADER.txt')

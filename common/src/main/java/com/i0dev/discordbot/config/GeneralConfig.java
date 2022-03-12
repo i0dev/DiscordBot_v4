@@ -64,9 +64,12 @@ public class GeneralConfig extends AbstractConfiguration {
     long suggestionAcceptedChannel = 0L;
     long suggestionDeniedChannel = 0L;
     long joinLeaveLogsChannel = 0L;
-    long factionsConfirmedChannel = 0L;
     long welcomeMessageChannel = 0L;
     long memberCounterChannel = 0L;
+
+    long factionsConfirmedChannel = 0L;
+    long skyblockConfirmedChannel = 0L;
+    long prisonsConfirmedChannel = 0L;
 
     // Roles
 

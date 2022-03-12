@@ -4,5 +4,6 @@ include(
         'bukkit',
         'bungeecord',
         'common',
-        'standalone'
+        'standalone',
+        'velocity'
 )

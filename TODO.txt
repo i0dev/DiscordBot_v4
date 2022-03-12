@@ -20,3 +20,10 @@ In game link make so click to copy code. Maybe for the future.
 
 java.sql.SQLException: [SQLITE_ERROR] SQL error or missing database (near "DROP": syntax error)
         at com.i0dev.discordbot.manager.SQLManager.absenceCheck(SQLManager.java:143) ~[?:?]
+
+/links
+
+    - sends a customizable list of links relating to the server
+
+
+reports?!?

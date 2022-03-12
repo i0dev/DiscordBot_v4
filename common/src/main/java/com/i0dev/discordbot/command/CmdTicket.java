@@ -394,7 +394,7 @@ public class CmdTicket extends DiscordCommand {
         Category category = heart.getJda().getCategoryById(option.getCategory()) == null ? heart.getJda().getCategoryById(cnf.getDefaultTicketCreateCategoryID()) : heart.getJda().getCategoryById(option.getCategory());
         long newTicketNumber = storage.getTicketNumber() + 1;
         storage.setTicketNumber(newTicketNumber);
-        String channelName = option.getChannelName().replace("{num}", String.valueOf(newTicketNumber));
+        String channelName = option.getChannelName().replace("{name}", owner.getName()).replace("{num}", String.valueOf(newTicketNumber));
         TextChannel channel = category.createTextChannel(channelName).complete();
         Ticket ticket = new Ticket();
         ticket.setTicketNumber(newTicketNumber);
@@ -533,7 +533,7 @@ public class CmdTicket extends DiscordCommand {
 
         TextChannel logs;
         if (ticket.isAdminOnlyMode()) logs = heart.getJda().getTextChannelById(cnf.getAdminLogsChannelID());
-        else logs = heart.getJda().getTextChannelById(cnf.getAdminLogsChannelID());
+        else logs = heart.getJda().getTextChannelById(cnf.getTicketLogsChannelID());
 
         if (logs != null) {
             logs.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(embedMaker.build())).queueAfter(5, TimeUnit.MILLISECONDS);

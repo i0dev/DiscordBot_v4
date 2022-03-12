@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    implementation 'mysql:mysql-connector-java:8.0.25'
     compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     testCompileOnly 'org.projectlombok:lombok:1.18.22'

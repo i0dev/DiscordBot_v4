@@ -33,7 +33,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class AutoModManager extends AbstractManager {
     public AutoModManager(Heart heart) {

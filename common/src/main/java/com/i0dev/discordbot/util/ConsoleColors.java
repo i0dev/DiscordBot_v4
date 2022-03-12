@@ -25,6 +25,7 @@
 
 package com.i0dev.discordbot.util;
 
+
 public class ConsoleColors {
     /*
     CREDIT TO: https://stackoverflow.com/a/45444716/15202003

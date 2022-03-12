@@ -78,7 +78,7 @@ public class CmdPrison extends DiscordCommand {
         String team = e.getOption("team").getAsString();
         long size = e.getOption("size").getAsLong();
 
-        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getFactionsConfirmedChannel());
+        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getPrisonsConfirmedChannel());
         if (channel == null) return;
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(heart.cnf().getPrisonConfirmTitle())

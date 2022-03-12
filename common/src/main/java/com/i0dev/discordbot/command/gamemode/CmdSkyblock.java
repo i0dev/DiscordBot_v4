@@ -67,7 +67,7 @@ public class CmdSkyblock extends DiscordCommand {
 
         DiscordUser discordUser = getHeart().genMgr().getDiscordUser(user);
 
-        discordUser.addRole(heart.cnf().getFactionsLeaderRole());
+        discordUser.addRole(heart.cnf().getSkyblockLeaderRole());
 
         data.replySuccess("Successfully gave the user the skyblock leader role.");
 
@@ -78,7 +78,7 @@ public class CmdSkyblock extends DiscordCommand {
         String team = e.getOption("team").getAsString();
         long size = e.getOption("size").getAsLong();
 
-        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getFactionsConfirmedChannel());
+        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getSkyblockConfirmedChannel());
         if (channel == null) return;
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(heart.cnf().getSkyblockConfirmTitle())
