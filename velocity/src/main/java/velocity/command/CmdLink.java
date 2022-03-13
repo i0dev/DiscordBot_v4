@@ -27,7 +27,9 @@ package velocity.command;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.manager.LinkManager;
+import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.User;
@@ -57,6 +59,7 @@ public class CmdLink extends AbstractCommand {
     @SneakyThrows
     @Override
     public void execute(CommandSource source, String @NonNull [] args) {
+
         if (!(source instanceof Player)) {
             source.sendMessage(Component.text("Only players can run this command", NamedTextColor.RED));
             return;
@@ -75,7 +78,7 @@ public class CmdLink extends AbstractCommand {
 
             if (resultSet.next()) {
                 User user = heart.genMgr().retrieveUser(Long.parseLong(resultSet.getString("id")));
-                source.sendMessage(Component.text("You are already linked to the Discord account:", NamedTextColor.RED)
+                source.sendMessage(Component.text("You are already linked to the Discord account: ", NamedTextColor.RED)
                         .append(Component.text(user.getAsTag(), NamedTextColor.GRAY).append(Component.text(".", NamedTextColor.RED)))
                 );
                 return;
@@ -123,7 +126,7 @@ public class CmdLink extends AbstractCommand {
 
 
     @Override
-    public List<String> suggest(@NonNull CommandSource sender, String[] args) {
+    public List<String> suggest(CommandSource sender, String[] args) {
         if (args.length == 1) return tabCompleteHelper(args[0], Collections.singletonList("generate"));
         return blank;
     }

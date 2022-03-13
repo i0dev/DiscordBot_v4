@@ -28,18 +28,21 @@ package velocity.object;
 import com.i0dev.discordbot.Heart;
 import com.velocitypowered.api.command.Command;
 import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public abstract class AbstractCommand implements Command {
+public abstract class AbstractCommand implements SimpleCommand {
 
     protected Heart heart;
 
@@ -54,11 +57,19 @@ public abstract class AbstractCommand implements Command {
         this.command = command;
     }
 
-    public abstract void execute(CommandSource sender, String[] args);
-
-    public List<String> suggest(CommandSource sender, String[] args) {
-        return null;
+    @Override
+    public void execute(Invocation invocation) {
+        execute(invocation.source(), invocation.arguments());
     }
+
+    @Override
+    public List<String> suggest(Invocation invocation) {
+        return suggest(invocation.source(), invocation.arguments());
+    }
+
+    abstract public List<String> suggest(CommandSource sender, String[] args);
+
+    abstract public void execute(CommandSource source, String[] args);
 
     public List<String> tabCompleteHelper(String arg, Collection<String> options) {
         if (arg.equalsIgnoreCase("") || arg.equalsIgnoreCase(" "))

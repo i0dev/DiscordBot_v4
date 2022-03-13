@@ -61,7 +61,7 @@ public class VelocityMain {
                 StartupTag.BUNGEE,
                 StartupTag.PLUGIN
         ), this.logger, this);
-        server.getCommandManager().register("Link",new CmdLink(heart, "Link"));
+        server.getCommandManager().register("Link", new CmdLink(heart, "Link"));
     }
 
     @Subscribe
