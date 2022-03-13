@@ -98,24 +98,24 @@ public class GeneralManager extends AbstractManager {
             user.addRole(role);
         });
 
-        if (!heart.cnf().isWelcomeMessagesEnabled()) return;
-        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getWelcomeMessageChannel());
-        if (channel != null) {
-            if (heart.cnf().isWelcomePingUser()) channel.sendMessage(e.getMember().getAsMention()).queue();
-            String image = heart.cnf().getWelcomeEmbedImageUrl().equals("") ? null : heart.cnf().getWelcomeEmbedImageUrl();
-            String thumbnail = heart.cnf().isWelcomeUserMemberAvatarAsThumbnail() ? e.getUser().getEffectiveAvatarUrl() : heart.getJda().getSelfUser().getEffectiveAvatarUrl();
+        if (heart.cnf().isWelcomeMessagesEnabled()) {
+            TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getWelcomeMessageChannel());
+            if (channel != null) {
+                if (heart.cnf().isWelcomePingUser()) channel.sendMessage(e.getMember().getAsMention()).queue();
+                String image = heart.cnf().getWelcomeEmbedImageUrl().equals("") ? null : heart.cnf().getWelcomeEmbedImageUrl();
+                String thumbnail = heart.cnf().isWelcomeUserMemberAvatarAsThumbnail() ? e.getUser().getEffectiveAvatarUrl() : heart.getJda().getSelfUser().getEffectiveAvatarUrl();
 
-            channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
-                    .title(heart.cnf().getWelcomeEmbedTitle())
-                    .author(e.getUser())
-                    .user(e.getUser())
-                    .guild(e.getGuild())
-                    .thumbnail(thumbnail)
-                    .image(image)
-                    .content(heart.cnf().getWelcomeEmbedContent())
-                    .build())).queue();
+                channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                        .title(heart.cnf().getWelcomeEmbedTitle())
+                        .author(e.getUser())
+                        .user(e.getUser())
+                        .guild(e.getGuild())
+                        .thumbnail(thumbnail)
+                        .image(image)
+                        .content(heart.cnf().getWelcomeEmbedContent())
+                        .build())).queue();
+            }
         }
-
         /*
         Join Logs
          */
