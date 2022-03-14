@@ -1,35 +1,21 @@
 plugins {
-    id 'java-library'
     id 'com.github.johnrengelman.shadow' version '6.0.0'
-}
-
-test {
-    useJUnitPlatform {
-        excludeTags 'dependency_checksum'
-    }
-}
-
-dependencies {
-    compileOnly 'com.neovisionaries:nv-websocket-client:1.21'
-    compileOnly 'mysql:mysql-connector-java:8.0.25'
-    implementation("net.dv8tion:JDA:5.0.0-alpha.5")
-    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
-    compileOnly 'org.slf4j:slf4j-api:1.7.30'
-    compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha5'
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    testCompileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
-    api 'com.google.code.gson:gson:2.7'
-    api 'com.google.guava:guava:19.0'
-    api 'com.squareup.okhttp3:okhttp:3.14.9'
-    api 'com.zaxxer:HikariCP:4.0.3'
-    api 'org.mongodb:mongo-java-driver:3.12.8'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 }
 
 repositories {
     maven { url "https://m2.dv8tion.net/releases" }
+}
+
+dependencies {
+    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0-alpha6'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.zaxxer:HikariCP:4.0.3'
+
+    compileOnly "net.dv8tion:JDA:5.0.0-alpha.9"
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
