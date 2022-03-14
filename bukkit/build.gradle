@@ -23,5 +23,6 @@ dependencies {
 }
 
 shadowJar {
-    baseName 'DiscordBot-Bukkit'
+    archiveBaseName.set("DiscordBot-Bukkit")
+    archiveClassifier.set("")
 }

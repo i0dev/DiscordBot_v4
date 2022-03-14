@@ -24,7 +24,7 @@ subprojects {
     }
 
     license {
-        header = rootProject.file('HEADER.txt')
+        header = rootProject.file('LISCENSE.txt')
         include '**/*.java'
         newLine = true
     }

@@ -20,5 +20,6 @@ repositories {
 }
 
 shadowJar {
-    baseName 'DiscordBot-Bungee'
+    archiveBaseName.set("DiscordBot-Bungee")
+    archiveClassifier.set("")
 }
