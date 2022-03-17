@@ -34,6 +34,8 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.util.concurrent.TimeUnit;
+
 public class AutoModManager extends AbstractManager {
     public AutoModManager(Heart heart) {
         super(heart);
@@ -49,6 +51,8 @@ public class AutoModManager extends AbstractManager {
             return;
         }
         if (!(e.getChannel() instanceof GuildChannel)) return;
+        TextChannel logChannel = e.getGuild().getTextChannelById(cnf.getAutoModLogChannelId());
+
         if (isInChannelWhereShouldEffect((GuildChannel) e.getChannel())) {
 
             boolean hasBad = false;
@@ -64,13 +68,27 @@ public class AutoModManager extends AbstractManager {
             if (hasBad) {
                 e.getMessage().delete().queue();
                 if (cnf.isLogEverything()) {
-                    TextChannel logChannel = e.getGuild().getTextChannelById(cnf.getAutoModLogChannelId());
                     if (logChannel != null) {
                         logChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                                 .authorName("AutoMod Log")
                                 .user(e.getAuthor())
                                 .authorImg(e.getAuthor().getEffectiveAvatarUrl())
                                 .content("{tag} said a blacklisted word in their message: \n||{message}||".replace("{message}", e.getMessage().getContentRaw()))
+                                .build())).queue();
+                    }
+                }
+            }
+            if (cnf.isMaxPingModuleEnabled()) {
+                int mentioned = e.getMessage().getMentionedUsers().size();
+                if (mentioned >= cnf.getMaxPings()) {
+                    e.getMessage().delete().queue();
+                    e.getMember().timeoutFor(cnf.getMillisTimeoutLengthForExceedingPingLimit(), TimeUnit.MILLISECONDS).queue();
+                    if (logChannel != null) {
+                        logChannel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
+                                .authorName("AutoMod Log")
+                                .user(e.getAuthor())
+                                .authorImg(e.getAuthor().getEffectiveAvatarUrl())
+                                .content("{tag} pinged too many users. They have been timed out & their message deleted.")
                                 .build())).queue();
                     }
                 }

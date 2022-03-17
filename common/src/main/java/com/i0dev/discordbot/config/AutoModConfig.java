@@ -27,7 +27,6 @@ package com.i0dev.discordbot.config;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.abs.AbstractConfiguration;
-import com.i0dev.discordbot.object.config.PermissionNode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -54,12 +53,16 @@ public class AutoModConfig extends AbstractConfiguration {
     List<Long> channelsToDeleteSentMessageIn = new ArrayList<>();
 
     List<String> deleteMessageIfContains = Arrays.asList(
-            "nicecar",
+            "n-----",
             "discord.gg"
     );
 
     List<Long> autoModEffectedChannels = new ArrayList<>();
     boolean effectedChannelsWhitelistMode = false;
+
+    boolean maxPingModuleEnabled = true;
+    short maxPings = 8;
+    long millisTimeoutLengthForExceedingPingLimit = 86400000;
 
 
 }

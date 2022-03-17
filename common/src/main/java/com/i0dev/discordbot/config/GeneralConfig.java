@@ -50,6 +50,7 @@ public class GeneralConfig extends AbstractConfiguration {
     boolean administratorBypassPermissions = true;
 
     DatabaseInformation database = new DatabaseInformation();
+
     List<Long> verifiedGuilds = Collections.singletonList(879086812776239165L);
 
     String successColor = "#27ae5f";

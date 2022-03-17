@@ -38,6 +38,6 @@ public class DatabaseInformation {
     long port = 3306;
     String username = "root";
     String password = "password";
-
+    long taskReconnectConnectionTimeoutMilliseconds = 3600000;
 
 }

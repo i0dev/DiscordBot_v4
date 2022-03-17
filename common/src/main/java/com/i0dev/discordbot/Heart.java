@@ -168,7 +168,8 @@ public class Heart {
                 new TaskAutoGiveRoles(this),
                 new TaskUpdateMemberCounter(this),
                 new TaskUpdateUsersNickname(this),
-                new TaskVerifyAuthentication(this)
+                new TaskVerifyAuthentication(this),
+                new TaskReconnectSQL(this)
 
         ));
         executorService = Executors.newScheduledThreadPool((int) (tasks.size() / 1.333333));
