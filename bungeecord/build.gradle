@@ -4,6 +4,10 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        name 'bungeecord-repo'
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
 }
 
 dependencies {
@@ -14,7 +18,7 @@ dependencies {
     runtimeOnly 'mysql:mysql-connector-java:8.0.28'
     runtimeOnly 'org.xerial:sqlite-jdbc:3.36.0.3'
 
-    compileOnly 'net.md-5:bungeecord-api:1.16-R0.3'
+    compileOnly 'net.md-5:bungeecord-api:1.16-R0.4'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
