@@ -295,7 +295,7 @@ public class Heart {
     @SneakyThrows
     public void createJDA() {
         jda = JDABuilder.create(cnf().getBotToken(), EnumSet.allOf(GatewayIntent.class))
-                .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .setStatus(OnlineStatus.fromKey(cnf().getBotStatus()))
                 .setContextEnabled(true)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .enableCache(EnumSet.allOf(CacheFlag.class))

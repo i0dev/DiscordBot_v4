@@ -46,6 +46,7 @@ public class GeneralConfig extends AbstractConfiguration {
     String botToken = "Your Token Here";
     String activity = "i0dev Bot v4";
     String activityType = "watching";
+    String botStatus = "online";
     String activityStreamingUrl = "https://www.twitch.tv/i0dev";
     boolean administratorBypassPermissions = true;
 
