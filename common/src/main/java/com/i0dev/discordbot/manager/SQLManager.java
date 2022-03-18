@@ -83,6 +83,8 @@ public class SQLManager extends AbstractManager {
             config.setJdbcUrl("jdbc:mysql://" + db.getAddress() + ":" + db.getPort() + "/" + database);
             config.setUsername(db.getUsername());
             config.setPassword(db.getPassword());
+            config.setIdleTimeout(heart.cnf().getDatabase().getIdleTimeout());
+            config.setMaxLifetime(heart.cnf().getDatabase().getMax_lifetime());
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
