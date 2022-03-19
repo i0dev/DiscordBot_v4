@@ -597,7 +597,8 @@ public class CmdTicket extends DiscordCommand {
                 }
             }
             closeTicket(ticket, cnf.getDefaultCloseReason(), e.getUser());
-            e.deferReply().queue();
+            if (!e.getInteraction().isAcknowledged())
+                e.deferReply().queue();
             return;
         }
 
