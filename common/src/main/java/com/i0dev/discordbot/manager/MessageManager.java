@@ -107,6 +107,7 @@ public class MessageManager extends AbstractManager {
                     .replace("{uuid}", discordUser.getMinecraftUUID())
                     .replace("{invites}", discordUser.getDiscordInvites() + "")
                     .replace("{isBot}", user.isBot() ? "Yes" : "No")
+                    .replace("{isLinked}", discordUser.isLinked() ? "Yes" : "No")
                     .replace("{timeCreated}", "<t:" + (user.getTimeCreated().toInstant().toEpochMilli() / 1000L) + ":R>")
                     .replace("{linkTime}", "<t:" + (discordUser.getLinkedTime() / 1000L) + ":R>")
                     .replace("{name}", user.getName());
