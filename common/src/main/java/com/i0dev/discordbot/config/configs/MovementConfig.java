@@ -97,7 +97,7 @@ public class MovementConfig extends AbstractConfiguration {
             )
     );
 
-    String promoteContent = "**{tag}** `({ign})`` has been promoted to **{displayName}**.";
+    String promoteContent = "**{tag}** `({ign})` has been promoted to **{displayName}**.";
     String promoteTitle = "Staff Promotion";
     String demoteContent = "**{tag}** `({ign})` has been demoted to **{displayName}**.";
     String demoteTitle = "Staff Demotion";
