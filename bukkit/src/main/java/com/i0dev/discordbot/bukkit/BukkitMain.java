@@ -37,8 +37,11 @@ import java.util.Arrays;
 public class BukkitMain extends JavaPlugin {
     Heart heart;
 
+    boolean isPapiEnabled;
+
     @Override
     public void onEnable() {
+        isPapiEnabled = getServer().getPluginManager().isPluginEnabled("PlaceholderAPI");
         heart = new Heart(Arrays.asList(
                 StartupTag.BUKKIT,
                 StartupTag.PLUGIN
@@ -46,6 +49,9 @@ public class BukkitMain extends JavaPlugin {
 
 
         registerCmd("Link", new CmdLink(heart, "Link"));
+        if (isPapiEnabled) {
+            new com.i0dev.discordbot.bukkit.hook.PAPIHook(heart).register();
+        }
     }
 
     public void registerCmd(String cmd, AbstractCommand abstractCommand) {

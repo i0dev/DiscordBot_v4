@@ -10,7 +10,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     group = 'com.i0dev.discordbot'
-    version = '4.0.6'
+    version = '4.0.7'
 
     jar {
         from '../LICENSE.txt'

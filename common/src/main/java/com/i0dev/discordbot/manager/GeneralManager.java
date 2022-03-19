@@ -63,6 +63,10 @@ public class GeneralManager extends AbstractManager {
         return getDiscordUser(iSnowflake.getIdLong());
     }
 
+    public DiscordUser getDiscordUser(String id) {
+        return getDiscordUser(Long.parseLong(id));
+    }
+
     public DiscordUser getDiscordUser(long id) {
         if (id == 0) return null;
         DiscordUser user = (DiscordUser) heart.sqlMgr().getObject("id", id, DiscordUser.class);
