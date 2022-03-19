@@ -21,57 +21,46 @@ public class PAPIHook extends PlaceholderExpansion {
     }
 
     @Override
-    public @NotNull String getIdentifier() {
+    public @NotNull
+    String getIdentifier() {
         return "discordbot";
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public @NotNull
+    String getAuthor() {
         return "i01";
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public @NotNull
+    String getVersion() {
         return Heart.VERSION;
     }
 
     @SneakyThrows
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
-        DiscordUser discordUser = null;
-        User user = null;
+        DiscordUser user = null;
         ResultSet resultSet = heart.sqlMgr().runQueryWithResult("SELECT * FROM DiscordUser WHERE minecraftUUID = '" + player.getUniqueId() + "'");
-
-        if (resultSet.next()) {
-            String id = resultSet.getString("id");
-            discordUser = heart.genMgr().getDiscordUser(id);
-            user = heart.getJda().retrieveUserById(id).complete();
-        }
+        if (resultSet.next()) user = heart.genMgr().getDiscordUser(resultSet.getString("id"));
 
         // User Specific
-        if (params.equalsIgnoreCase("is_linked")) {
-            return discordUser == null ? "false" : "true";
-        }
-
-        if (params.equalsIgnoreCase("is_boosting")) {
-            boolean isBoosting = false;
-            if (discordUser != null && user != null) {
-                for (Guild allowedGuild : heart.getAllowedGuilds()) {
-                    Member member = allowedGuild.getMember(user);
+        if (params.equalsIgnoreCase("is_linked"))
+            return user == null ? "false" : "true";
+        else if (params.equalsIgnoreCase("is_boosting")) {
+            if (user != null) {
+                for (Guild guild : heart.getAllowedGuilds()) {
+                    Member member = guild.getMember(user.getAsUser());
                     if (member == null) continue;
-                    if (member.isBoosting()) {
-                        isBoosting = true;
-                        break;
-                    }
+                    if (member.isBoosting()) return "true";
                 }
             }
-            return isBoosting ? "true" : "false";
-        }
+            return "false";
+        } else if (params.equalsIgnoreCase("linked_tag"))
+            return user == null ? "" : user.getAsUser().getAsTag();
 
-        if (params.equalsIgnoreCase("linked_tag")) {
-            if (discordUser == null || user == null) return "";
-            return user.getAsTag();
-        }
+
 
 
         return null;
