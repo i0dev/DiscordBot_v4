@@ -72,8 +72,12 @@ public class SQLManager extends AbstractManager {
         return connection.prepareStatement(sql).executeQuery();
     }
 
-    @SneakyThrows
     public void connect() {
+        connect(true);
+    }
+
+    @SneakyThrows
+    public void connect(boolean msg) {
         Class.forName("org.sqlite.JDBC");
         DatabaseInformation db = heart.cnf().getDatabase();
         String database = db.getName();
@@ -81,21 +85,28 @@ public class SQLManager extends AbstractManager {
             Class.forName("com.mysql.cj.jdbc.Driver");
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl("jdbc:mysql://" + db.getAddress() + ":" + db.getPort() + "/" + database);
+            config.setPoolName("i0dev-discord_bot-hikari");
             config.setUsername(db.getUsername());
             config.setPassword(db.getPassword());
-            config.setIdleTimeout(heart.cnf().getDatabase().getIdleTimeout());
-            config.setMaxLifetime(heart.cnf().getDatabase().getMax_lifetime());
+            config.setMaxLifetime(db.getMaxLifetime());
             config.addDataSourceProperty("cachePrepStmts", "true");
             config.addDataSourceProperty("prepStmtCacheSize", "250");
             config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+            config.setMaximumPoolSize(db.getMaxPoolSize());
+            config.setMinimumIdle(db.getMinIdleConnections());
+            config.setMaxLifetime(db.getMaxLifetime());
+            config.setKeepaliveTime(db.getKeepAliveTime());
+            config.setConnectionTimeout(db.getConnectionTimeout());
             HikariDataSource ds = new HikariDataSource(config);
             connection = ds.getConnection();
-            heart.logSpecial("Connected to Hikari MySQL database: " + ConsoleColors.PURPLE_BOLD + database);
+            if (msg)
+                heart.logSpecial("Connected to Hikari MySQL database: " + ConsoleColors.PURPLE_BOLD + database);
         } else {
             database = heart.getDataFolder() + "/DiscordBot.db";
             String url = "jdbc:sqlite:" + database;
             connection = DriverManager.getConnection(url);
-            heart.logSpecial("Connected to SQLite database: " + ConsoleColors.PURPLE_BOLD + "DiscordBot.db");
+            if (msg)
+                heart.logSpecial("Connected to SQLite database: " + ConsoleColors.PURPLE_BOLD + "DiscordBot.db");
         }
     }
 

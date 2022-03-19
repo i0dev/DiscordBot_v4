@@ -39,7 +39,10 @@ public class DatabaseInformation {
     String username = "root";
     String password = "password";
     long taskReconnectConnectionTimeoutMilliseconds = 3600000;
-    long max_lifetime = 1800000;
-    long idleTimeout = 1800000;
+    int maxPoolSize = 10;
+    int minIdleConnections = 10;
+    long maxLifetime = 1800000;
+    long keepAliveTime = 0;
+    long connectionTimeout = 5000;
 
 }

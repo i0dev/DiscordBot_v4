@@ -14,7 +14,7 @@ public class TaskReconnectSQL extends AbstractTask {
 
     @Override
     public void initialize() {
-        setInterval(14);
+        setInterval(heart.cnf().getDatabase().getTaskReconnectConnectionTimeoutMilliseconds());
         setInitialDelay(heart.cnf().getDatabase().getTaskReconnectConnectionTimeoutMilliseconds());
         setTimeUnit(TimeUnit.MILLISECONDS);
     }
@@ -23,7 +23,7 @@ public class TaskReconnectSQL extends AbstractTask {
     @Override
     public void execute() {
         if (heart.sqlMgr().getConnection() == null) return;
-        heart.logSpecial("Reconnecting to SQL database.");
-        heart.sqlMgr().connect();
+        if (heart.sqlMgr().getConnection().isClosed()) heart.sqlMgr().getConnection().close();
+        heart.sqlMgr().connect(false);
     }
 }
