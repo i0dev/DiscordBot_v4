@@ -112,7 +112,10 @@ public class CmdMovement extends DiscordCommand {
         }
 
         MovementObject newObject = getMovementObjectFromMainRole(role);
-        if (newObject != null) newObject.getExtraRoles().forEach(discordUser::addRole);
+        if (newObject != null) {
+            discordUser.addRole(newObject.getMainRole());
+            newObject.getExtraRoles().forEach(discordUser::addRole);
+        }
 
         if (channel == null) {
             heart.logDebug("Movement channel is null. Did not send movement message, but still gave roles.");
@@ -151,7 +154,10 @@ public class CmdMovement extends DiscordCommand {
         discordUser.addRole(role);
 
         MovementObject newObject = getMovementObjectFromMainRole(role);
-        if (newObject != null) newObject.getExtraRoles().forEach(discordUser::addRole);
+        if (newObject != null) {
+            discordUser.addRole(newObject.getMainRole());
+            newObject.getExtraRoles().forEach(discordUser::addRole);
+        }
 
         if (channel == null) {
             heart.logDebug("Movement channel is null. Did not send movement message, but still removed/added roles.");
