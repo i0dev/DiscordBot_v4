@@ -138,4 +138,6 @@ public class GeneralConfig extends AbstractConfiguration {
     String skyblockConfirmTitle = "Island Confirmed";
     String prisonConfirmFormat = "Gang: `{team}`\nLeader: `{tag}`\nMembers: `{size}`";
     String prisonConfirmTitle = "Gang confirmed";
+
+    String cmdIpContent = "Server ip: `play.MCRivals.com`";
 }

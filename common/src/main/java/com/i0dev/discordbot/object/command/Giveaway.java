@@ -32,21 +32,20 @@ import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.util.ConfigUtil;
 import com.i0dev.discordbot.util.Utility;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
 
 @Data
 @AllArgsConstructor
@@ -64,8 +63,8 @@ public class Giveaway {
         return !this.ended;
     }
 
-    public TextChannel getChannel(Heart heart) {
-        return heart.getJda().getTextChannelById(this.channelID);
+    public GuildMessageChannel getChannel(Heart heart) {
+        return (GuildMessageChannel) heart.getJda().getGuildChannelById(channelID);
     }
 
     public void end(Heart heart, boolean rerolled) {

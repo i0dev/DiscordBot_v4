@@ -230,7 +230,8 @@ public class Heart {
                 new CmdRename(this),
                 new CmdPrison(this),
                 new CmdSkyblock(this),
-                new CmdTebex(this)
+                new CmdTebex(this),
+                new CmdIP(this)
 
         ));
         commands.forEach(command -> {
@@ -275,8 +276,12 @@ public class Heart {
         }
     }
 
-    @SneakyThrows
     public void shutdown() {
+        shutdown(true);
+    }
+
+    @SneakyThrows
+    public void shutdown(boolean exit) {
         configs.forEach(AbstractConfiguration::deinitialize);
         managers.forEach(AbstractManager::deinitialize);
         commands.forEach(DiscordCommand::deinitialize);
@@ -289,7 +294,7 @@ public class Heart {
         if (executorService != null) executorService.shutdown();
         if (sqlMgr() != null && sqlMgr().getConnection() != null) sqlMgr().getConnection().close();
         logger.log(Level.INFO, ConsoleColors.GREEN_BOLD + "-> " + ConsoleColors.WHITE_BOLD + "i0dev DiscordBot " + ConsoleColors.GREEN_BOLD + "Successfully" + ConsoleColors.WHITE_BOLD + " Shutdown." + ConsoleColors.RESET);
-        if (tags.contains(StartupTag.STANDALONE)) System.exit(0);
+        if (tags.contains(StartupTag.STANDALONE) && exit) System.exit(0);
     }
 
     @SneakyThrows
@@ -314,7 +319,6 @@ public class Heart {
     }
 
     // Utilities
-
     public List<String> getAllCommandIDS() {
         List<String> ret = new ArrayList<>();
         commands.forEach(command -> {

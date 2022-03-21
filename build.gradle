@@ -1,19 +1,9 @@
 plugins {
     id 'java'
-    id 'org.cadixdev.licenser' version '0.6.1' apply false
 }
-
-defaultTasks 'licenseFormat', 'build'
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.cadixdev.licenser'
-
     group = 'com.i0dev.discordbot'
     version = '4.0.7'
-
-    jar {
-        from '../LICENSE.txt'
-    }
-
 }

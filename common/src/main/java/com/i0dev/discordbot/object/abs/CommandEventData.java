@@ -60,6 +60,10 @@ public class CommandEventData {
         if (event.isAcknowledged()) return;
         event.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().content(message).colorHexCode(heart.successColor()).build())).queue();
     }
+    public void replyNormal(String message) {
+        if (event.isAcknowledged()) return;
+        event.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().content(message).colorHexCode(heart.normalColor()).build())).queue();
+    }
 
 
     public Message replyComplete(EmbedMaker embedMaker) {
