@@ -50,7 +50,7 @@ public class CmdReload extends DiscordCommand {
                 .colorHexCode(getHeart().successColor())
                 .build());
 
-        heart.shutdown();
+        heart.shutdown(false);
         heart.startup();
     }
 
