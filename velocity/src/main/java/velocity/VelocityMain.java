@@ -58,7 +58,7 @@ public class VelocityMain {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent e) {
         heart = new Heart(Arrays.asList(
-                StartupTag.BUNGEE,
+                StartupTag.VELOCITY,
                 StartupTag.PLUGIN
         ), this.logger, this);
         server.getCommandManager().register("Link", new CmdLink(heart, "Link"));
