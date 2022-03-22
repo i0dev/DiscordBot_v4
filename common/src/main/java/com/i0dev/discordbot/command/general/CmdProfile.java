@@ -58,7 +58,7 @@ public class CmdProfile extends DiscordCommand {
         if (e.getOptions().size() == 0) user = e.getUser();
         else user = e.getOption("user").getAsUser();
 
-        DiscordUser discordUser = data.getDiscordUser();
+        DiscordUser discordUser = heart.genMgr().getDiscordUser(user);
         Member member = e.getGuild().getMember(user);
 
         StringBuilder bot = new StringBuilder();
