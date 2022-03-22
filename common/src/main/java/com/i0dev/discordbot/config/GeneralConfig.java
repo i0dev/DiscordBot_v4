@@ -140,4 +140,5 @@ public class GeneralConfig extends AbstractConfiguration {
     String prisonConfirmTitle = "Gang confirmed";
 
     String cmdIpContent = "Server ip: `play.MCRivals.com`";
+    char helpPageSymbol = '•';
 }

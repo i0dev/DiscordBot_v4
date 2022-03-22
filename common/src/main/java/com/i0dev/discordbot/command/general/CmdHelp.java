@@ -45,8 +45,6 @@ public class CmdHelp extends DiscordCommand {
         super(heart);
     }
 
-    int pages = 2;
-
     @Override
     protected void setupCommand() {
         setCommand("help");
@@ -65,9 +63,7 @@ public class CmdHelp extends DiscordCommand {
         multiCommands.forEach(cmd -> {
             StringBuilder sb = new StringBuilder();
             sb.append("**/").append(cmd.getCommand()).append("**\n");
-            cmd.getSubCommands().forEach(subCmd -> {
-                sb.append("** • **`").append(subCmd.getName()).append("` - ").append(subCmd.getDescription()).append("\n");
-            });
+            cmd.getSubCommands().forEach(subCmd -> sb.append("** ").append(heart.cnf().getHelpPageSymbol()).append(" **`").append(subCmd.getName()).append("` - ").append(subCmd.getDescription()).append("\n"));
             helpRows.add(sb.toString());
         });
 
