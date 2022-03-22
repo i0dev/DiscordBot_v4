@@ -149,7 +149,6 @@ public class CmdTicket extends DiscordCommand {
             ticket.setAdminOnlyMode(false);
             setTicketNormalMode(ticket);
             data.replySuccess("Ticket is no longer admin only.");
-            return;
         } else {
             ticket.setAdminOnlyMode(true);
             setTicketAdminOnly(ticket);
@@ -162,9 +161,8 @@ public class CmdTicket extends DiscordCommand {
         if (!ticketCheck(e, data)) return;
         Ticket ticket = storage.getTicketByID(e.getChannel().getId());
         String reason = e.getOption("reason") == null ? cnf.getDefaultCloseReason() : e.getOption("reason").getAsString();
-        closeTicket(ticket, reason, e.getUser());
-        if (e.isAcknowledged()) return;
         e.deferReply().queue();
+        closeTicket(ticket, reason, e.getUser());
     }
 
     public void info(SlashCommandInteractionEvent e, CommandEventData data) {
@@ -574,17 +572,18 @@ public class CmdTicket extends DiscordCommand {
             if (!cnf.isAllowTicketOwnerToAdminOnly() && ticket.getTicketOwnerID() != e.getUser().getIdLong()) {
                 if (heart.dscCmdMgr().hasPermission(e, "ticket_admin_only")) {
                     e.reply("You don't have permission to use admin only.").setEphemeral(true).queue();
+                    return;
                 }
             }
 
             if (ticket.isAdminOnlyMode()) {
                 ticket.setAdminOnlyMode(false);
                 setTicketNormalMode(ticket);
-                e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is no longer admin only.").build())).queue();
+                e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is no longer admin only.").build())).queue();
             } else {
                 ticket.setAdminOnlyMode(true);
                 setTicketAdminOnly(ticket);
-                e.getChannel().sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is now in admin only mode.").build())).queue();
+                e.replyEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().colorHexCode(heart.successColor()).content("Ticket is now in admin only mode.").build())).queue();
             }
             ConfigUtil.save(storage);
             return;
@@ -595,11 +594,11 @@ public class CmdTicket extends DiscordCommand {
             if (!cnf.isAllowTicketOwnerToCloseOwnTicket() && ticket.getTicketOwnerID() != e.getUser().getIdLong()) {
                 if (heart.dscCmdMgr().hasPermission(e, "ticket_close")) {
                     e.reply("You don't have permission to close tickets.").setEphemeral(true).queue();
+                    return;
                 }
             }
+            e.deferReply().queue();
             closeTicket(ticket, cnf.getDefaultCloseReason(), e.getUser());
-            if (!e.getInteraction().isAcknowledged())
-                e.deferReply().queue();
             return;
         }
 
