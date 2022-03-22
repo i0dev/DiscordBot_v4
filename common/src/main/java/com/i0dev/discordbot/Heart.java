@@ -331,7 +331,7 @@ public class Heart {
 
 
     public File getDataFolder() {
-        if ((isBungee() || isBukkit()) && isPlugin()) return new File("plugins/DiscordBot");
+        if ((isBungee() || isBukkit() || isVelocity()) && isPlugin()) return new File("plugins/DiscordBot");
         if (isStandalone()) return new File("DiscordBot");
         return null;
     }
@@ -389,6 +389,10 @@ public class Heart {
 
     public boolean isBukkit() {
         return tags.contains(StartupTag.BUKKIT);
+    }
+
+    public boolean isVelocity(){
+        return tags.contains(StartupTag.VELOCITY);
     }
 
     public boolean isPlugin() {

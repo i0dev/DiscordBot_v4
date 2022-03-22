@@ -44,7 +44,6 @@ public class VelocityMain {
 
     Heart heart;
 
-
     private final ProxyServer server;
     private final Logger logger;
 
