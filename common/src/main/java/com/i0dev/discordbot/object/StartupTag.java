@@ -30,6 +30,7 @@ public enum StartupTag {
     PLUGIN,
     BUKKIT,
     BUNGEE,
+    VELOCITY,
     STANDALONE
 
 
