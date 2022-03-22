@@ -27,6 +27,7 @@ package com.i0dev.discordbot.manager;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.object.DiscordUser;
+import com.i0dev.discordbot.object.StartupTag;
 import com.i0dev.discordbot.object.abs.AbstractManager;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -150,9 +151,15 @@ public class MessageManager extends AbstractManager {
                     .replace("{botID}", jda.getSelfUser().getId())
                     .replace("{botName}", jda.getSelfUser().getName());
 
+        String mode = "";
+        if (heart.getTags().contains(StartupTag.BUKKIT)) mode = "Bukkit";
+        else if (heart.getTags().contains(StartupTag.BUNGEE)) mode = "Bungee";
+        else if (heart.getTags().contains(StartupTag.STANDALONE)) mode = "Standalone";
+        else if (heart.getTags().contains(StartupTag.VELOCITY)) mode = "Velocity";
+
         message = message
                 .replace("{botAuthor}", "i0#0001")
-                .replace("{pluginMode}", heart.isPlugin() ? "Yes" : "No")
+                .replace("{pluginMode}", mode)
                 .replace("{version}", Heart.VERSION);
 
         return message;

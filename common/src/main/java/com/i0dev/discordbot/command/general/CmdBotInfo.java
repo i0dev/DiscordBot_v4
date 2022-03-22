@@ -44,7 +44,7 @@ public class CmdBotInfo extends DiscordCommand {
     public void initialize() {
         String msg = "Bot Author: " + "`{botAuthor}`" + "\n" +
                 "Bot Version: `" + "{version}" + "`\n" +
-                "Plugin Mode: `" + "{pluginMode}" + "`\n";
+                "Mode: `" + "{pluginMode}" + "`\n";
 
         message = EmbedMaker.builder()
                 .authorName("DiscordBot Information")
