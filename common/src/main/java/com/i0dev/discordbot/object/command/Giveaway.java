@@ -83,8 +83,18 @@ public class Giveaway {
             });
         selectionPool.removeIf(User::isBot);
         List<User> selectedWinners = new ArrayList();
-        for (int i = 0; i < this.winners; i++)
-            selectedWinners.add(selectionPool.get(ThreadLocalRandom.current().nextInt(selectionPool.size())));
+        int maxTries = 50;
+        for (int i = 0, tries = 0; i < Math.min(winners, selectionPool.size()); i++) {
+            User winner = selectionPool.get(ThreadLocalRandom.current().nextInt(selectionPool.size()));
+            if (selectedWinners.contains(winner)) {
+                tries++;
+                i--;
+                if (tries > maxTries) break;
+                continue;
+            }
+            selectedWinners.add(winner);
+
+        }
         this.getChannel(heart).sendMessageEmbeds(this.getGiveawayEndMessage(heart, rerolled, selectedWinners, selectionPool.size()), new MessageEmbed[0]).queue();
         String winnersContent = heart.cnf().getWonGiveawayFormat().replace("{prize}", this.prize).replace("{tag}", host.getAsTag()).replace("{time}", "<t:" + this.endTime / 1000L + ":R>");
         selectedWinners.forEach((user) -> (user.openPrivateChannel().complete()).sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder().authorImg(heart.getJda().getSelfUser().getEffectiveAvatarUrl()).authorName("You won a giveaway!").authorURL("https://discordapp.com/channels/" + this.getChannel(heart).getGuild().getId() + "/" + this.channelID + "/" + this.messageID).content(winnersContent).colorHexCode(heart.successColor()).build()), new MessageEmbed[0]).queue());

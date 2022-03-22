@@ -71,7 +71,6 @@ public class InviteManager extends AbstractManager {
 
                 joined.setInvitedByID(inviter.getId());
 
-
                 inviter.save();
                 joined.save();
                 found.set(true);
