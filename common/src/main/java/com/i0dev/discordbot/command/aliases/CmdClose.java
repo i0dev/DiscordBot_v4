@@ -30,8 +30,7 @@ public class CmdClose extends DiscordCommand {
         if (!cmdTicket.ticketCheck(e, data)) return;
         Ticket ticket = cmdTicket.getStorage().getTicketByID(e.getChannel().getId());
         String reason = e.getOption("reason") == null ? cmdTicket.getCnf().getDefaultCloseReason() : e.getOption("reason").getAsString();
-        cmdTicket.closeTicket(ticket, reason, e.getUser());
-        if (e.isAcknowledged()) return;
         e.deferReply().queue();
+        cmdTicket.closeTicket(ticket, reason, e.getUser());
     }
 }
