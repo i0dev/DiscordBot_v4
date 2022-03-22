@@ -229,7 +229,7 @@ public class CmdTicket extends DiscordCommand {
             for (TicketOption ticketOption : cnf.getTicketOptions()) {
                 Button button;
                 String id = "TICKET_OPTION_" + ticketOption.getTicketID();
-                Emoji emoji = Emoji.fromUnicode(ticketOption.getEmoji());
+                Emoji emoji = Emoji.fromMarkdown(ticketOption.getEmoji());
                 String label = ticketOption.getButtonLabel();
                 switch (ticketOption.getTicketColor().toUpperCase()) {
                     case "GREEN":
