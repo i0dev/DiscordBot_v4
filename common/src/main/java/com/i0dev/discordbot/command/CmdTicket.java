@@ -417,7 +417,8 @@ public class CmdTicket extends DiscordCommand {
 
         if (option.isAdminOnlyDefault()) setTicketAdminOnly(ticket);
         else setTicketNormalMode(ticket);
-        List<String> toPing = Arrays.asList(owner.getAsMention());
+        List<String> toPing = new ArrayList<>();
+        toPing.add(owner.getAsMention());
         if (option.isPingStaff()) {
             if (option.getRolesToPing().isEmpty()) {
                 for (Long aLong : cnf.getDefaultRolesToPing()) {
