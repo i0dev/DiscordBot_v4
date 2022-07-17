@@ -31,12 +31,14 @@ import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
 import com.i0dev.discordbot.object.command.Giveaway;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.apache.commons.collections4.Bag;
 
 public class CmdFactions extends DiscordCommand {
 
@@ -79,21 +81,21 @@ public class CmdFactions extends DiscordCommand {
         String faction = e.getOption("faction").getAsString();
         long size = e.getOption("size").getAsLong();
 
-        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getFactionsConfirmedChannel());
+        GuildMessageChannel channel = (GuildMessageChannel) heart.getJda().getGuildChannelById(heart.cnf().getFactionsConfirmedChannel());
         if (channel == null) return;
+        String s = size == -1 ? "Unlimited" : String.valueOf(size);
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(heart.cnf().getFactionsConfirmTitle())
                 .user(leader)
                 .authorImg(leader.getEffectiveAvatarUrl())
                 .content(heart.cnf().getFactionsConfirmFormat()
                         .replace("{faction}", faction)
-                        .replace("{size}", size == -1 ? "Unlimited" : String.valueOf(size))
+                        .replace("{size}", s)
                 )
                 .build())).queue();
-
         data.replySuccess("Successfully confirmed the faction **{faction}** as playing with a roster size of **{size}**."
                 .replace("{faction}", faction)
-                .replace("{size}", size == -1 ? "Unlimited" : String.valueOf(size))
+                .replace("{size}", s)
         );
 
     }

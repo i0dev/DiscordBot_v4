@@ -119,6 +119,7 @@ public class GeneralConfig extends AbstractConfiguration {
 
     String linkInfoFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`";
     String linkInfoCheckIgnFormat = "Minecraft IGN: `{ign}`\nMinecraft UUID: `{uuid}`\nTime Linked: {linkTime}\nWas Forced: `{forced}`\nTag: `{tag}`\nID: `{id}`";
+
     long linkCodeLength = 6L;
     boolean verifyUserOnLink = true;
     boolean requireLinkToJoinGiveaways = true;

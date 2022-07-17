@@ -22,7 +22,7 @@ public class TaskReconnectSQL extends AbstractTask {
     @SneakyThrows
     @Override
     public void execute() {
-        if (!heart.sqlMgr().getConnection().isClosed()) heart.sqlMgr().getConnection().close();
-        heart.sqlMgr().connect(false);
+      //  if (!heart.sqlMgr().getConnection().isClosed()) heart.sqlMgr().getConnection().close();
+    //    heart.sqlMgr().connect(false);
     }
 }

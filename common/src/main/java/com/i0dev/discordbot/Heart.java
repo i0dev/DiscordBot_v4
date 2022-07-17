@@ -191,8 +191,10 @@ public class Heart {
     }
 
     public boolean isVerifiedBot() {
-        JSONObject access = apiMgr().getAuthentication(jda.getSelfUser().getId());
-        return (boolean) access.get("access");
+        return true;
+
+        //  JSONObject access = apiMgr().getAuthentication(jda.getSelfUser().getId());
+        //  return (boolean) access.get("access");
     }
 
 
@@ -391,7 +393,7 @@ public class Heart {
         return tags.contains(StartupTag.BUKKIT);
     }
 
-    public boolean isVelocity(){
+    public boolean isVelocity() {
         return tags.contains(StartupTag.VELOCITY);
     }
 

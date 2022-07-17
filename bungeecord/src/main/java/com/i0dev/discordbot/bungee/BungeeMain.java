@@ -25,17 +25,34 @@
 
 package com.i0dev.discordbot.bungee;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.bungee.command.CmdLink;
 import com.i0dev.discordbot.object.StartupTag;
+import lombok.SneakyThrows;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
+
 
 import java.util.Arrays;
 
 public class BungeeMain extends Plugin {
 
     Heart heart;
+
+    @SneakyThrows
+    public void sendCommand(String command, String server) {
+        if (server.equalsIgnoreCase("bungee")) {
+            ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), command);
+        } else {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Message");
+            out.writeUTF("ALL");
+            out.writeUTF(command);
+            ProxyServer.getInstance().getServerInfo(server).sendData("Message", out.toByteArray());
+        }
+    }
 
     @Override
     public void onEnable() {

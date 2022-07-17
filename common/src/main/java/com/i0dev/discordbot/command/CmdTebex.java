@@ -27,23 +27,15 @@ package com.i0dev.discordbot.command;
 
 import com.i0dev.discordbot.Heart;
 import com.i0dev.discordbot.config.configs.TebexConfig;
-import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
-import com.i0dev.discordbot.util.Utility;
 import lombok.SneakyThrows;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.json.simple.JSONObject;
-
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CmdTebex extends DiscordCommand {
 
@@ -126,11 +118,6 @@ public class CmdTebex extends DiscordCommand {
             data.replyFailure("No payment found with id: " + id);
             return;
         }
-
-
-
-
-
 
 
     }

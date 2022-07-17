@@ -30,6 +30,8 @@ import com.i0dev.discordbot.object.DiscordUser;
 import com.i0dev.discordbot.object.abs.CommandEventData;
 import com.i0dev.discordbot.object.abs.DiscordCommand;
 import com.i0dev.discordbot.object.builder.EmbedMaker;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -78,7 +80,7 @@ public class CmdSkyblock extends DiscordCommand {
         String team = e.getOption("team").getAsString();
         long size = e.getOption("size").getAsLong();
 
-        TextChannel channel = heart.getJda().getTextChannelById(heart.cnf().getSkyblockConfirmedChannel());
+        GuildMessageChannel channel = (GuildMessageChannel) heart.getJda().getGuildChannelById(heart.cnf().getSkyblockConfirmedChannel());
         if (channel == null) return;
         channel.sendMessageEmbeds(heart.msgMgr().createMessageEmbed(EmbedMaker.builder()
                 .authorName(heart.cnf().getSkyblockConfirmTitle())
